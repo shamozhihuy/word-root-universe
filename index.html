@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
   <title>词根宇宙 · 多语料库</title>
   <style>
     :root {
@@ -509,6 +510,118 @@
 
     .switch input:checked::after {
       transform: translateX(15px);
+    }
+
+    .preview-search {
+      width: min(520px, 100%);
+      min-height: 42px;
+      margin-bottom: 14px;
+      padding: 0 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      background: var(--surface);
+    }
+
+    .preview-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .preview-row {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      transition: border-color 0.2s ease, transform 0.2s ease;
+    }
+
+    .preview-row:hover {
+      border-color: #b8c4d8;
+      transform: translateY(-1px);
+    }
+
+    .preview-speak {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--blue);
+      transition: background 0.2s ease;
+    }
+
+    .preview-speak:hover {
+      background: var(--blue-2);
+    }
+
+    .preview-speak svg {
+      width: 19px;
+      height: 19px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .preview-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .preview-word {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 4px 9px;
+      color: var(--ink);
+      font-weight: 750;
+      line-height: 1.25;
+      word-break: break-word;
+    }
+
+    .preview-phonetic {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    .preview-definition {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .preview-empty,
+    .preview-result {
+      padding: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .preview-load-more {
+      width: min(280px, 100%);
+      min-height: 42px;
+      margin: 16px auto 0;
+      display: none;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--blue);
+      background: var(--surface);
+    }
+
+    .preview-load-more:hover {
+      border-color: var(--blue);
     }
 
     .daily-root {
@@ -1605,6 +1718,96 @@
       line-height: 1.65;
     }
 
+    .training-section {
+      margin: 16px 0;
+    }
+
+    .training-section-title {
+      margin: 0 0 10px;
+      color: var(--ink);
+      font-size: 17px;
+    }
+
+    .training-task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .training-task {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface-2);
+    }
+
+    .training-task-index {
+      width: 34px;
+      height: 34px;
+      flex: 0 0 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      color: var(--blue);
+      background: var(--amber-soft);
+      font-weight: 800;
+    }
+
+    .training-task-main {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .training-task-title {
+      color: var(--ink);
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .training-task-meta {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .training-start {
+      min-height: 36px;
+      flex: 0 0 auto;
+      padding: 0 13px;
+      border-radius: 8px;
+      color: #fff;
+      background: var(--blue);
+      transition: background 0.2s ease;
+    }
+
+    .training-start:hover {
+      background: var(--blue-2);
+    }
+
+    .training-empty {
+      padding: 34px 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+      text-align: center;
+    }
+
+    .training-empty strong {
+      display: block;
+      color: var(--ink);
+      font-size: 22px;
+    }
+
+    .training-empty p {
+      margin: 8px 0 18px;
+      color: var(--muted);
+    }
+
     .word-image {
       width: min(100%, 360px);
       max-height: 240px;
@@ -1711,6 +1914,15 @@
       .review-stats,
       .teacher-grid {
         grid-template-columns: 1fr;
+      }
+
+      .training-task {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .training-start {
+        width: 100%;
       }
 
       .mode-toolbar {
@@ -1846,6 +2058,10 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
         词根画廊
       </button>
+      <button class="mode-btn" data-mode="preview">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/><circle cx="12" cy="12" r="3"/></svg>
+        单词预览
+      </button>
       <button class="mode-btn" data-mode="spelling">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
         沉浸式默写
@@ -1869,6 +2085,10 @@
       <button class="mode-btn" data-mode="teacher">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 8l10 5 10-5-10-5Z"/><path d="M6 10.6V16a6 3 0 0 0 12 0v-5.4"/></svg>
         AI 老师
+      </button>
+      <button class="mode-btn" data-mode="training">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Z"/><path d="m12 6 4 10-4-3-4 3Z"/></svg>
+        专属训练
       </button>
       <span style="flex:1"></span>
       <button class="mode-btn" id="bookmarkBtn" title="我的生词本">
@@ -2040,12 +2260,14 @@
 
       const MODE_LABELS = {
         gallery: "词根画廊",
+        preview: "单词预览",
         spelling: "沉浸式默写",
         listening: "听音选义",
         crossover: "词库穿越",
         review: "智能复习",
         speaking: "口语跟读",
-        teacher: "AI 老师"
+        teacher: "AI 老师",
+        training: "专属训练"
       };
 
       const defaultState = {
@@ -2055,6 +2277,7 @@
         assessment: null,
         progress: {},
         customWords: [],
+        trainingPlan: null,
         settings: {
           apiProvider: "deepseek",
           apiKey: "",
@@ -2073,6 +2296,8 @@
       let mediaRecorder = null;
       let recordedChunks = [];
       let recordedAudioUrl = null;
+      let previewOffset = 0;
+      const PREVIEW_PAGE_SIZE = 120;
       let assessmentSession = {
         step: 0,
         targetExam: "",
@@ -2468,6 +2693,8 @@
         }
         if (state.mode === "gallery") {
           renderGallery(main);
+        } else if (state.mode === "preview") {
+          renderPreview(main);
         } else if (state.mode === "spelling") {
           renderSpelling(main);
         } else if (state.mode === "listening") {
@@ -2480,6 +2707,8 @@
           renderSpeaking(main);
         } else if (state.mode === "teacher") {
           renderTeacher(main);
+        } else if (state.mode === "training") {
+          renderTraining(main);
         } else {
           main.innerHTML = "";
         }
@@ -2540,6 +2769,96 @@
               "</button>";
           }).join("") +
           "</div>";
+      }
+
+      function renderPreview(main) {
+        const exam = state.currentExam;
+        const words = wordsForExam(exam);
+        previewOffset = 0;
+        if (!words.length) {
+          main.innerHTML = emptyStateHtml("这个词库还没有单词", "上传 CSV 或切换到其他词库开始预览。", "上传词库", "openUpload");
+          return;
+        }
+        main.innerHTML = '<div class="mode-toolbar">' +
+          '<div class="eyebrow">单词预览 · <strong>' + escapeHtml(exam) + "</strong></div>" +
+          '<div class="preview-result" id="previewResult">共 ' + words.length + " 词</div>" +
+          "</div>" +
+          '<input class="preview-search" id="previewSearch" type="search" placeholder="搜索英文、音标或中文释义" autocomplete="off" />' +
+          '<div class="preview-list" id="previewList"></div>' +
+          '<button class="preview-load-more" id="previewLoadMore">加载更多</button>';
+        renderPreviewList("");
+      }
+
+      function getPreviewWords(query) {
+        const q = String(query || "").trim().toLowerCase();
+        return wordsForExam(state.currentExam).filter(function (word) {
+          if (!q) {
+            return true;
+          }
+          return (word.word || "").toLowerCase().indexOf(q) !== -1 ||
+            (word.phonetic || "").toLowerCase().indexOf(q) !== -1 ||
+            (word.definitionCn || "").toLowerCase().indexOf(q) !== -1;
+        });
+      }
+
+      function renderPreviewRow(word) {
+        return '<div class="preview-row">' +
+          '<button class="preview-speak" data-preview-speak="' + escapeAttr(word.id) + '" title="播放标准读音" aria-label="播放标准读音"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button>' +
+          '<div class="preview-main">' +
+          '<div class="preview-word">' + escapeHtml(word.word) + '<span class="preview-phonetic">' + escapeHtml(word.phonetic || "/暂无音标/") + "</span></div>" +
+          '<div class="preview-definition">' + escapeHtml(word.definitionCn || "暂无释义") + "</div>" +
+          "</div>" +
+          "</div>";
+      }
+
+      function renderPreviewList(query) {
+        const words = getPreviewWords(query);
+        const visible = words.slice(0, previewOffset + PREVIEW_PAGE_SIZE);
+        const list = document.getElementById("previewList");
+        if (list) {
+          list.innerHTML = visible.length
+            ? visible.map(renderPreviewRow).join("")
+            : '<div class="preview-empty">没有匹配的单词</div>';
+        }
+        const result = document.getElementById("previewResult");
+        if (result) {
+          result.textContent = words.length ? ("共 " + words.length + " 词") : "未找到匹配单词";
+        }
+        const loadMore = document.getElementById("previewLoadMore");
+        if (loadMore) {
+          loadMore.style.display = words.length > visible.length ? "block" : "none";
+        }
+        bindPreviewSpeakers();
+      }
+
+      function bindPreviewSpeakers() {
+        document.querySelectorAll("[data-preview-speak]").forEach(function (button) {
+          button.onclick = function (event) {
+            event.stopPropagation();
+            const word = allWords().find(function (item) { return item.id === button.dataset.previewSpeak; });
+            if (word) {
+              speakWord(word);
+            }
+          };
+        });
+      }
+
+      function bindPreviewEvents() {
+        const input = document.getElementById("previewSearch");
+        const loadMore = document.getElementById("previewLoadMore");
+        if (input) {
+          input.oninput = function () {
+            previewOffset = 0;
+            renderPreviewList(input.value);
+          };
+        }
+        if (loadMore) {
+          loadMore.onclick = function () {
+            previewOffset += PREVIEW_PAGE_SIZE;
+            renderPreviewList(input ? input.value : "");
+          };
+        }
+        bindPreviewSpeakers();
       }
 
       function renderDailyRoot(dailyRoot) {
@@ -2982,6 +3301,116 @@
           '<button class="ghost-btn" data-action="openSettings">配置 API Key</button></div>' +
           '<div id="teacherPlan" class="ai-content" style="margin-top:16px"></div>' +
           '</div>';
+      }
+
+      function renderTraining(main) {
+        const exam = state.currentExam;
+        const planData = getTrainingPlanData();
+        if (!state.trainingPlan || !planData) {
+          main.innerHTML = '<div class="mode-toolbar"><div class="eyebrow">专属训练 · <strong>' + escapeHtml(exam) + '</strong></div></div>' +
+            '<div class="training-empty"><strong>还没有专属训练计划</strong><p>先到 AI 老师页生成一份基于你当前水平的训练计划。</p>' +
+            '<button class="primary-btn" data-action="goto-teacher">去 AI 老师生成</button></div>';
+          return;
+        }
+
+        const tasks = Array.isArray(planData.today_plan) ? planData.today_plan : [];
+        const generatedLabel = state.trainingPlan.generatedAt ? formatTrainingTime(state.trainingPlan.generatedAt) : "刚刚";
+        main.innerHTML = '<div class="mode-toolbar">' +
+          '<div class="eyebrow">专属训练 · <strong>' + escapeHtml(exam) + '</strong></div>' +
+          '<div class="exam-pill">' + escapeHtml(generatedLabel) + ' 生成</div>' +
+          '</div>' +
+          '<div class="teacher-panel">' +
+          '<div class="teacher-head"><div><h2 class="teacher-title">你的专属训练</h2><div class="teacher-sub">计划根据你的当前词库、错题和遗忘曲线生成，点击任务可直接进入对应训练。</div></div></div>' +
+          '<div class="teacher-grid">' +
+          '<div class="teacher-card"><h4>水平总结</h4><p>' + escapeHtml(planData.level_summary || "未返回") + '</p></div>' +
+          '<div class="teacher-card"><h4>薄弱点分析</h4><p>' + escapeHtml(planData.weakness_analysis || "未返回") + '</p></div>' +
+          '</div>' +
+          '<div class="training-section">' +
+          '<h3 class="training-section-title">今日训练任务</h3>' +
+          (tasks.length
+            ? '<div class="training-task-list">' + tasks.map(renderTrainingTask).join("") + '</div>'
+            : '<div class="training-empty"><p>AI 没有返回具体任务，请重新生成一份计划。</p></div>') +
+          '</div>' +
+          '<div class="teacher-grid">' +
+          '<div class="teacher-card"><h4>口语练习</h4><p>' + escapeHtml(planData.speaking_drill || "未返回") + '</p></div>' +
+          '<div class="teacher-card"><h4>考试建议</h4><p>' + escapeHtml(planData.exam_advice || "未返回") + '</p></div>' +
+          '</div>' +
+          '<div class="answer-actions">' +
+          '<button class="ghost-btn" data-action="goto-teacher">重新生成计划</button>' +
+          '<button class="ghost-btn" data-action="retakeAssessment">重新测评</button>' +
+          '</div>' +
+          '</div>';
+      }
+
+      function renderTrainingTask(item, index) {
+        const mode = getTrainingModeForTask(item.task);
+        return '<div class="training-task">' +
+          '<div class="training-task-index">' + (index + 1) + '</div>' +
+          '<div class="training-task-main">' +
+          '<div class="training-task-title">' + escapeHtml(item.task || "训练任务") + '</div>' +
+          '<div class="training-task-meta">' + escapeHtml(item.minutes || 10) + ' 分钟 · ' + escapeHtml(item.focus || "按当前词库训练") + '</div>' +
+          '</div>' +
+          '<button class="training-start" data-training-mode="' + escapeAttr(mode) + '">开始</button>' +
+          '</div>';
+      }
+
+      function getTrainingModeForTask(task) {
+        const text = String(task || "").toLowerCase();
+        if (/(口语|跟读|发音|speak)/.test(text)) {
+          return "speaking";
+        }
+        if (/(听音|听力|listen)/.test(text)) {
+          return "listening";
+        }
+        if (/(默写|拼写|spell)/.test(text)) {
+          return "spelling";
+        }
+        if (/(复习|错题|遗忘|review)/.test(text)) {
+          return "review";
+        }
+        if (/(预览|浏览|词表|preview)/.test(text)) {
+          return "preview";
+        }
+        return "gallery";
+      }
+
+      function parseTrainingPlan(raw) {
+        let parsed = null;
+        try {
+          parsed = JSON.parse(String(raw || "").replace(/```json/gi, "").replace(/```/g, "").trim());
+        } catch (error) {
+          parsed = null;
+        }
+        return parsed;
+      }
+
+      function getTrainingPlanData() {
+        if (!state.trainingPlan || !state.trainingPlan.raw) {
+          return null;
+        }
+        return parseTrainingPlan(state.trainingPlan.raw);
+      }
+
+      function storeTrainingPlan(raw) {
+        state.trainingPlan = {
+          exam: state.currentExam,
+          raw: String(raw || ""),
+          generatedAt: Date.now()
+        };
+        persist();
+      }
+
+      function formatTrainingTime(timestamp) {
+        if (!timestamp) {
+          return "刚刚";
+        }
+        const date = new Date(timestamp);
+        return (date.getMonth() + 1) + "月" + date.getDate() + "日 " +
+          ("0" + date.getHours()).slice(-2) + ":" + ("0" + date.getMinutes()).slice(-2);
+      }
+
+      function trainingEntryButton() {
+        return '<div class="answer-actions"><button class="primary-btn" id="teacherEnterTraining">进入专属训练</button></div>';
       }
 
       function buildDiagnostics(exam) {
@@ -3509,6 +3938,10 @@
           bindSpellingEvents();
         }
 
+        if (state.mode === "preview") {
+          bindPreviewEvents();
+        }
+
         if (state.mode === "listening") {
           bindListeningEvents();
         }
@@ -3523,6 +3956,10 @@
 
         if (state.mode === "teacher") {
           bindTeacherEvents();
+        }
+
+        if (state.mode === "training") {
+          bindTrainingEvents();
         }
 
         if (state.mode === "crossover") {
@@ -3791,11 +4228,13 @@
             plan.innerHTML = '<div class="ai-section"><span>正在分析你的学习现状…</span></div>';
             requestAITeacherPlan().then(function (html) {
               plan.innerHTML = html;
+              bindTeacherEntryButton();
             }).catch(function (error) {
               plan.innerHTML = '<div class="ai-section"><h4>生成失败</h4><p>' + escapeHtml(error.message || "网络请求失败") + '</p></div>';
             });
           };
         }
+        bindTeacherEntryButton();
         const settingsButton = document.querySelector("[data-action='openSettings']");
         if (settingsButton) {
           settingsButton.onclick = function () {
@@ -3808,6 +4247,40 @@
             openAssessment();
           };
         }
+      }
+
+      function bindTeacherEntryButton() {
+        const enterTraining = document.getElementById("teacherEnterTraining");
+        if (enterTraining) {
+          enterTraining.onclick = function () {
+            state.mode = "training";
+            session = createSession();
+            render();
+          };
+        }
+      }
+
+      function bindTrainingEvents() {
+        document.querySelectorAll("[data-training-mode]").forEach(function (button) {
+          button.onclick = function () {
+            state.mode = button.dataset.trainingMode;
+            session = createSession();
+            persist();
+            render();
+          };
+        });
+        document.querySelectorAll("[data-action='goto-teacher']").forEach(function (button) {
+          button.onclick = function () {
+            state.mode = "teacher";
+            session = createSession();
+            render();
+          };
+        });
+        document.querySelectorAll("[data-action='retakeAssessment']").forEach(function (button) {
+          button.onclick = function () {
+            openAssessment();
+          };
+        });
       }
 
       function startSpeechPractice(word) {
@@ -4028,14 +4501,10 @@
       }
 
       function renderTeacherPlan(raw) {
-        let parsed = null;
-        try {
-          parsed = JSON.parse(String(raw || "").replace(/```json/gi, "").replace(/```/g, "").trim());
-        } catch (error) {
-          parsed = null;
-        }
+        storeTrainingPlan(raw);
+        const parsed = parseTrainingPlan(raw);
         if (!parsed) {
-          return '<div class="ai-section"><h4>AI 训练计划</h4><pre>' + escapeHtml(raw) + '</pre></div>';
+          return '<div class="ai-section"><h4>AI 训练计划</h4><pre>' + escapeHtml(raw) + '</pre></div>' + trainingEntryButton();
         }
         const plan = Array.isArray(parsed.today_plan) ? parsed.today_plan : [];
         return '<div class="ai-section"><h4>水平总结</h4><p>' + escapeHtml(parsed.level_summary || "未返回") + '</p></div>' +
@@ -4044,7 +4513,8 @@
             return '<p><strong>' + escapeHtml(item.task || "训练") + '</strong> · ' + escapeHtml(item.minutes || 10) + ' 分钟<br><span style="color:var(--muted)">' + escapeHtml(item.focus || "") + '</span></p>';
           }).join("") : '<p>暂无训练计划</p>') + '</div>' +
           '<div class="ai-section"><h4>口语练习</h4><p>' + escapeHtml(parsed.speaking_drill || "未返回") + '</p></div>' +
-          '<div class="ai-section"><h4>考试建议</h4><p>' + escapeHtml(parsed.exam_advice || "未返回") + '</p></div>';
+          '<div class="ai-section"><h4>考试建议</h4><p>' + escapeHtml(parsed.exam_advice || "未返回") + '</p></div>' +
+          trainingEntryButton();
       }
 
       function toggleBookmark(exam, wordId) {
@@ -4704,12 +5174,35 @@
         if (!word) {
           return;
         }
-        if (word.audioUrl) {
-          const audio = new Audio(word.audioUrl);
-          audio.play().catch(function () { fallbackSpeak(word.word); });
+        const sources = [word.audioUrl, getRemoteAudioUrl(word.word, 2), getRemoteAudioUrl(word.word, 1)]
+          .filter(Boolean)
+          .filter(function (url, index, list) { return list.indexOf(url) === index; });
+        if (!sources.length) {
+          fallbackSpeak(word.word);
           return;
         }
-        fallbackSpeak(word.word);
+        playAudioSource(sources, 0, word.word);
+      }
+
+      function getRemoteAudioUrl(word, type) {
+        if (!word) {
+          return "";
+        }
+        return "https://dict.youdao.com/dictvoice?type=" + (type || 2) + "&audio=" + encodeURIComponent(word);
+      }
+
+      function playAudioSource(sources, index, text) {
+        if (index >= sources.length) {
+          fallbackSpeak(text);
+          return;
+        }
+        const audio = new Audio(sources[index]);
+        audio.onerror = function () {
+          playAudioSource(sources, index + 1, text);
+        };
+        audio.play().catch(function () {
+          playAudioSource(sources, index + 1, text);
+        });
       }
 
       function fallbackSpeak(text) {
