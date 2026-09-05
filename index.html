@@ -2258,33 +2258,6 @@
         };
       });
 
-      WORDS.forEach(function (word) {
-        if (!Array.isArray(word.examTypes)) {
-          word.examTypes = [];
-        }
-        const difficulty = Number(word.difficultyLevel) || 1;
-        const cefr = String(word.cefrLevel || "");
-        const wordText = String(word.word || "");
-        if (difficulty <= 1 && cefr.indexOf("A2") !== -1) {
-          pushExamType(word, "小学");
-        } else if (difficulty === 2) {
-          pushExamType(word, "初中");
-        } else if (difficulty === 3) {
-          pushExamType(word, "高中");
-        } else if (difficulty >= 4) {
-          pushExamType(word, "CET-6");
-        }
-        if (difficulty <= 2 || wordText.length <= 6 || (cefr.indexOf("A2") !== -1 || cefr.indexOf("B1") !== -1)) {
-          pushExamType(word, "常用");
-        }
-      });
-
-      function pushExamType(word, exam) {
-        if (word.examTypes.indexOf(exam) === -1) {
-          word.examTypes.push(exam);
-        }
-      }
-
       const MODE_LABELS = {
         gallery: "词根画廊",
         preview: "单词预览",
