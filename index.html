@@ -2119,7 +2119,7 @@
     (function () {
       "use strict";
 
-      const EXAM_TYPES = ["A级", "CET-4", "考研", "雅思", "托福", "自定义"];
+      const EXAM_TYPES = ["小学", "初中", "高中", "A级", "CET-4", "CET-6", "考研", "雅思", "托福", "常用", "自定义"];
       const STORAGE_KEY = "root-universe-v2";
 
       /*
@@ -2257,6 +2257,33 @@
           }
         };
       });
+
+      WORDS.forEach(function (word) {
+        if (!Array.isArray(word.examTypes)) {
+          word.examTypes = [];
+        }
+        const difficulty = Number(word.difficultyLevel) || 1;
+        const cefr = String(word.cefrLevel || "");
+        const wordText = String(word.word || "");
+        if (difficulty <= 1 && cefr.indexOf("A2") !== -1) {
+          pushExamType(word, "小学");
+        } else if (difficulty === 2) {
+          pushExamType(word, "初中");
+        } else if (difficulty === 3) {
+          pushExamType(word, "高中");
+        } else if (difficulty >= 4) {
+          pushExamType(word, "CET-6");
+        }
+        if (difficulty <= 2 || wordText.length <= 6 || (cefr.indexOf("A2") !== -1 || cefr.indexOf("B1") !== -1)) {
+          pushExamType(word, "常用");
+        }
+      });
+
+      function pushExamType(word, exam) {
+        if (word.examTypes.indexOf(exam) === -1) {
+          word.examTypes.push(exam);
+        }
+      }
 
       const MODE_LABELS = {
         gallery: "词根画廊",
@@ -3587,11 +3614,16 @@
 
       function getExamAssessmentHint(exam) {
         const map = {
+          "小学": "小学基础词汇",
+          "初中": "初中核心词汇",
+          "高中": "高中核心词汇",
           "A级": "高职高专应用能力考试",
           "CET-4": "大学英语四级",
+          "CET-6": "大学英语六级",
           "考研": "考研英语一/二",
           "雅思": "IELTS 学术类",
           "托福": "TOEFL iBT",
+          "常用": "高频常用词汇",
           "自定义": "个人词库与兴趣学习"
         };
         return map[exam] || "学习目标";
