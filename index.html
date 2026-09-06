@@ -294,12 +294,16 @@
 
     body.force-mobile .top-actions {
       width: 100%;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: repeat(6, 36px);
+      gap: 6px;
+      justify-content: end;
     }
 
-    body.force-mobile .exam-dropdown {
-      flex: 1;
-      min-width: 0;
+    body.force-mobile .exam-dropdown,
+    body.force-mobile .top-search {
+      grid-column: 1 / -1;
+      width: 100%;
     }
 
     body.force-mobile .exam-trigger {
@@ -308,9 +312,8 @@
     }
 
     body.force-mobile .top-search {
-      width: auto;
-      min-width: 170px;
-      flex: 1 1 170px;
+      width: 100%;
+      min-width: 0;
     }
 
     body.force-mobile .shell {
@@ -1955,12 +1958,16 @@
 
       .top-actions {
         width: 100%;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: repeat(6, 36px);
+        gap: 6px;
+        justify-content: end;
       }
 
-      .exam-dropdown {
-        flex: 1;
-        min-width: 0;
+      .exam-dropdown,
+      .top-search {
+        grid-column: 1 / -1;
+        width: 100%;
       }
 
       .exam-trigger {
@@ -1970,8 +1977,7 @@
 
       .top-search {
         width: auto;
-        min-width: 170px;
-        flex: 1 1 170px;
+        min-width: 0;
       }
 
       .summary {
