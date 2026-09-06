@@ -4888,6 +4888,7 @@
           '<div class="field"><label>API Key</label><input id="apiKey" type="password" value="' + escapeAttr(state.settings.apiKey || "") + '" placeholder="sk-..." /></div>' +
           '<div class="field-row"><div class="field"><label>每日目标</label><input id="dailyGoal" type="number" min="5" max="200" value="' + Number(state.settings.dailyGoal || 30) + '" /></div>' +
           '<div class="field"><label>复习提醒</label><select id="notifications"><option value="0"' + (state.settings.notifications ? "" : " selected") + '>关闭</option><option value="1"' + (state.settings.notifications ? " selected" : "") + '>开启</option></select></div></div>' +
+          '<div class="field"><label>视图模式</label><select id="viewModeSetting"><option value="auto"' + (state.viewMode === "auto" ? " selected" : "") + '>自动适应</option><option value="mobile"' + (state.viewMode === "mobile" ? " selected" : "") + '>手机版</option><option value="desktop"' + (state.viewMode === "desktop" ? " selected" : "") + '>电脑版</option></select></div>' +
           '<div class="field"><label class="switch"><input type="checkbox" id="rootHintSetting"' + (state.settings.rootHint ? " checked" : "") + ' /> 默写时显示词根拆解提示</label></div>' +
           '<div class="modal-actions">' +
           '<button class="ghost-btn" data-action="resetData">清空本地数据</button>' +
@@ -4914,11 +4915,13 @@
         const goal = Number(document.getElementById("dailyGoal").value) || 30;
         const notifications = document.getElementById("notifications").value === "1";
         const rootHint = document.getElementById("rootHintSetting").checked;
+        const viewMode = document.getElementById("viewModeSetting").value;
         state.settings.apiProvider = provider;
         state.settings.apiKey = key;
         state.settings.dailyGoal = Math.min(200, Math.max(5, goal));
         state.settings.notifications = notifications;
         state.settings.rootHint = rootHint;
+        state.viewMode = ["auto", "mobile", "desktop"].indexOf(viewMode) !== -1 ? viewMode : "auto";
         persist();
         closeModal();
         showToast("设置已保存");
