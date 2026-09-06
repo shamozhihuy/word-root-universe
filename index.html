@@ -3707,7 +3707,7 @@
             '<h2 class="assessment-title">你觉得自己目前的词汇水平更接近哪个？</h2>' +
             '<p class="assessment-sub">按直觉选择即可，后面的小测试会进一步校准。</p>' +
             '<div class="assessment-options" id="assessmentLevelOptions">' +
-            [{ level: "A2", label: "A级基础", desc: "约 2000-3000 词，能应对基础日常表达" }, { level: "B1", label: "四级水平", desc: "约 3500-4500 词，能阅读一般文章" }, { level: "B2", label: "考研/雅思", desc: "约 5500-7000 词，能处理学术材料" }, { level: "C1", label: "托福/高级", desc: "约 8000 词以上，追求接近母语使用" }].map(function (item) {
+            [{ level: "A1", label: "零基础 / 小学", desc: "刚开始学，约 600-1000 词" }, { level: "A2", label: "A级基础", desc: "约 2000-3000 词，能应对基础日常表达" }, { level: "B1", label: "四级水平", desc: "约 3500-4500 词，能阅读一般文章" }, { level: "B2", label: "考研 / 雅思", desc: "约 5500-7000 词，能处理学术材料" }, { level: "C1", label: "托福 / 高级", desc: "约 8000 词以上，能处理复杂内容" }, { level: "C2", label: "接近母语", desc: "词汇量很大，主要提升表达精度和语感" }, { level: "unknown", label: "我不确定", desc: "让后面的快速测试帮助判断" }].map(function (item) {
               return '<button class="assessment-option" data-level="' + item.level + '"><strong>' + item.label + '</strong><br><span style="color:var(--muted);font-size:12px">' + item.desc + '</span></button>';
             }).join("") +
             '</div>' +
@@ -3928,27 +3928,29 @@
       }
 
       function getEstimatedLevel(score, selfLevel) {
-        const ranks = { A2: 1, B1: 2, B2: 3, C1: 4 };
-        let rank = ranks[selfLevel] || 2;
+        const ranks = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6, unknown: 3 };
+        let rank = ranks[selfLevel] || 3;
         if (score >= 4) {
           rank += 1;
         } else if (score <= 2) {
           rank -= 1;
         }
-        rank = Math.max(1, Math.min(4, rank));
-        return ["A2", "B1", "B2", "C1"][rank - 1];
+        rank = Math.max(1, Math.min(6, rank));
+        return ["A1", "A2", "B1", "B2", "C1", "C2"][rank - 1];
       }
 
       function getRecommendedDailyGoal(level) {
-        return { A2: 15, B1: 25, B2: 35, C1: 45 }[level] || 30;
+        return { A1: 10, A2: 15, B1: 25, B2: 35, C1: 45, C2: 50 }[level] || 30;
       }
 
       function buildAssessmentAdvice(level) {
         const map = {
+          "A1": "从最基础的高频词和自然拼读开始，先建立每天稳定输入，再进入简单跟读。",
           "A2": "从高频基础词和发音开始，先建立稳定输入，再进入口语跟读。",
           "B1": "以四级核心词为主，重点补词根拆解和听音辨义。",
           "B2": "适合进入考研/雅思训练，把单词放到阅读和口语语境中输出。",
-          "C1": "减少机械背词，多练同义替换、学术搭配和口语成段表达。"
+          "C1": "减少机械背词，多练同义替换、学术搭配和口语成段表达。",
+          "C2": "重点提升语域、搭配和表达精度，多进行高级阅读与即兴口语训练。"
         };
         return map[level] || map.B1;
       }
