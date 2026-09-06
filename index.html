@@ -1318,7 +1318,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      z-index: 80;
+      z-index: 1200;
       display: flex;
       justify-content: flex-end;
       background: rgba(12, 20, 35, 0.42);
@@ -2450,6 +2450,8 @@
       let recordedAudioUrl = null;
       let previewOffset = 0;
       let lastNavKey = "";
+      let navStack = [];
+      let navIndex = -1;
       const PREVIEW_PAGE_SIZE = 120;
       let assessmentSession = {
         step: 0,
@@ -3491,7 +3493,8 @@
           return;
         }
 
-        const tasks = Array.isArray(planData.today_plan) ? planData.today_plan : [];
+        const rawTasks = Array.isArray(planData.today_plan) ? planData.today_plan : [];
+        const tasks = sortTrainingTasks(rawTasks);
         const generatedLabel = state.trainingPlan.generatedAt ? formatTrainingTime(state.trainingPlan.generatedAt) : "刚刚";
         main.innerHTML = '<div class="mode-toolbar">' +
           '<div class="eyebrow">专属训练 · <strong>' + escapeHtml(exam) + '</strong></div>' +
@@ -3543,6 +3546,9 @@
         if (/(默写|拼写|spell)/.test(text)) {
           return "spelling";
         }
+        if (/(认识|认词|识记|学习新词|记忆|记单词)/.test(text)) {
+          return "preview";
+        }
         if (/(复习|错题|遗忘|review)/.test(text)) {
           return "review";
         }
@@ -3550,6 +3556,22 @@
           return "preview";
         }
         return "gallery";
+      }
+
+      function sortTrainingTasks(tasks) {
+        const order = {
+          preview: 0,
+          gallery: 1,
+          listening: 2,
+          spelling: 3,
+          speaking: 4,
+          review: 5
+        };
+        return tasks.slice().sort(function (left, right) {
+          const leftMode = getTrainingModeForTask(left.task);
+          const rightMode = getTrainingModeForTask(right.task);
+          return (order[leftMode] || 6) - (order[rightMode] || 6);
+        });
       }
 
       function parseTrainingPlan(raw) {
@@ -3876,11 +3898,11 @@
       }
 
       function getAssessmentQuestions() {
-        const pool = shuffle(allWords().filter(function (word) {
+        const pool = shuffle(getAssessmentWordPool(assessmentSession.selfLevel)).filter(function (word) {
           return word.word && word.word.length >= 3 && word.definitionCn && word.definitionCn !== "暂无释义";
-        })).slice(0, 24);
+        }).slice(0, 24);
         const questions = pool.slice(0, 5).map(function (correctWord) {
-          const distractors = shuffle(allWords().filter(function (word) {
+          const distractors = shuffle(pool.filter(function (word) {
             return word.id !== correctWord.id && word.definitionCn && word.definitionCn !== correctWord.definitionCn;
           })).slice(0, 3).map(function (word) { return word.definitionCn; });
           const options = shuffle([correctWord.definitionCn].concat(distractors));
@@ -3893,6 +3915,27 @@
           };
         });
         return questions;
+      }
+
+      function getAssessmentWordPool(level) {
+        const examMap = {
+          A1: ["小学"],
+          A2: ["小学", "A级"],
+          B1: ["初中", "高中", "CET-4"],
+          B2: ["高中", "CET-6", "考研", "雅思"],
+          C1: ["CET-6", "雅思", "托福"],
+          C2: ["CET-6", "托福"],
+          unknown: []
+        };
+        const exams = examMap[level] || [];
+        if (!exams.length) {
+          return allWords();
+        }
+        return allWords().filter(function (word) {
+          return word.examTypes.some(function (exam) {
+            return exams.indexOf(exam) !== -1;
+          });
+        });
       }
 
       function handleAssessmentQuizAnswer(selectedIndex) {
@@ -4646,7 +4689,7 @@
           ? "https://api.openai.com/v1/chat/completions"
           : "https://api.deepseek.com/chat/completions";
         const model = provider === "openai" ? "gpt-4o-mini" : "deepseek-chat";
-        const systemPrompt = "你是一名英语私人教练，擅长根据词汇量、正确率、错词和遗忘曲线设计短期训练方案。请只返回 JSON，字段包括：level_summary、weakness_analysis、today_plan（数组，每项含 task/minutes/focus）、speaking_drill、exam_advice。";
+        const systemPrompt = "你是一名英语私人教练，擅长根据词汇量、正确率、错词和遗忘曲线设计短期训练方案。请只返回 JSON，字段包括：level_summary、weakness_analysis、today_plan（数组，每项含 task/minutes/focus）、speaking_drill、exam_advice。today_plan 必须按学习规律排序：先认识单词或词根，再听音辨义，再拼写默写，最后口语输出。基础薄弱时第一项不得安排默写。";
         const userPrompt = "当前词库：" + exam +
           "；已学习：" + diagnostics.seenCount +
           "；已掌握：" + diagnostics.masteredCount +
@@ -5433,8 +5476,37 @@
         if (key === lastNavKey) {
           return;
         }
-        history.pushState({ exam: state.currentExam, mode: state.mode }, "", location.href);
+        navStack = navStack.slice(0, navIndex + 1);
+        navStack.push({ exam: state.currentExam, mode: state.mode });
+        navIndex = navStack.length - 1;
         lastNavKey = key;
+      }
+
+      function applyNavigationSnapshot(snapshot) {
+        state.currentExam = snapshot.exam;
+        state.mode = snapshot.mode;
+        lastNavKey = navigationKey();
+        session = createSession();
+        persist();
+        render();
+      }
+
+      function goBackNavigation() {
+        if (navIndex > 0) {
+          navIndex -= 1;
+          applyNavigationSnapshot(navStack[navIndex]);
+        } else {
+          showToast("已经是上一步了");
+        }
+      }
+
+      function goForwardNavigation() {
+        if (navIndex < navStack.length - 1) {
+          navIndex += 1;
+          applyNavigationSnapshot(navStack[navIndex]);
+        } else {
+          showToast("已经是下一步了");
+        }
       }
 
       function handleWordSearch(query) {
@@ -5490,25 +5562,11 @@
             handleWordSearch(search.value);
           });
         }
-        document.getElementById("backBtn").addEventListener("click", function () {
-          history.back();
-        });
-        document.getElementById("forwardBtn").addEventListener("click", function () {
-          history.forward();
-        });
-        history.replaceState({ exam: state.currentExam, mode: state.mode }, "", location.href);
+        document.getElementById("backBtn").addEventListener("click", goBackNavigation);
+        document.getElementById("forwardBtn").addEventListener("click", goForwardNavigation);
+        navStack = [{ exam: state.currentExam, mode: state.mode }];
+        navIndex = 0;
         lastNavKey = navigationKey();
-        window.addEventListener("popstate", function (event) {
-          if (!event.state || !event.state.exam || !event.state.mode) {
-            return;
-          }
-          state.currentExam = event.state.exam;
-          state.mode = event.state.mode;
-          lastNavKey = navigationKey();
-          session = createSession();
-          persist();
-          render();
-        });
       }
 
       function bindGlobalEvents() {
