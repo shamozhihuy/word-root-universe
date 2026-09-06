@@ -286,6 +286,114 @@
       background: rgba(255, 255, 255, 0.16);
     }
 
+    body.force-mobile .topbar-inner {
+      align-items: flex-start;
+      padding: 12px 0;
+      flex-direction: column;
+    }
+
+    body.force-mobile .top-actions {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    body.force-mobile .exam-dropdown {
+      flex: 1;
+      min-width: 0;
+    }
+
+    body.force-mobile .exam-trigger {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    body.force-mobile .top-search {
+      width: auto;
+      min-width: 170px;
+      flex: 1 1 170px;
+    }
+
+    body.force-mobile .shell {
+      width: min(100% - 20px, 520px);
+      padding-top: 16px;
+    }
+
+    body.force-mobile .summary {
+      grid-template-columns: 1fr;
+    }
+
+    body.force-mobile .stat-grid,
+    body.force-mobile .root-matrix {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    body.force-mobile .listen-options {
+      grid-template-columns: 1fr;
+    }
+
+    body.force-mobile .review-stats,
+    body.force-mobile .teacher-grid {
+      grid-template-columns: 1fr;
+    }
+
+    body.force-mobile .mode-toolbar {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    body.force-mobile .training-task {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    body.force-mobile .training-start {
+      width: 100%;
+    }
+
+    body.force-mobile .card-face {
+      padding: 28px 20px 30px;
+    }
+
+    body.force-mobile .icon-btn {
+      width: 36px;
+      height: 36px;
+    }
+
+    body.force-mobile .brand-sub {
+      display: none;
+    }
+
+    body.force-desktop {
+      min-width: 1180px;
+    }
+
+    body.force-desktop .topbar-inner {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    body.force-desktop .top-actions {
+      width: auto;
+      justify-content: flex-end;
+    }
+
+    body.force-desktop .shell {
+      width: min(1120px, calc(100% - 32px));
+    }
+
+    body.force-desktop .summary {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    body.force-desktop .stat-grid,
+    body.force-desktop .review-stats {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    body.force-desktop .teacher-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .icon-btn svg,
     .brand-mark svg,
     .modebar svg,
@@ -2042,6 +2150,9 @@
         <button class="icon-btn" id="themeBtn" title="切换夜间模式" aria-label="切换夜间模式">
           <svg class="theme-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </button>
+        <button class="icon-btn" id="viewModeBtn" title="切换视图" aria-label="切换视图">
+          <svg class="view-mode-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+        </button>
         <button class="icon-btn" id="settingsBtn" title="设置" aria-label="设置">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
@@ -2308,6 +2419,7 @@
         currentExam: "A级",
         mode: "gallery",
         theme: "light",
+        viewMode: "auto",
         assessment: null,
         progress: {},
         customWords: [],
@@ -2653,6 +2765,8 @@
         renderModebar();
         renderMode();
         updateThemeIcon();
+        applyViewMode();
+        updateViewModeIcon();
         bindDynamicEvents();
       }
 
@@ -2719,6 +2833,29 @@
         icon.innerHTML = state.theme === "dark"
           ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>'
           : '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>';
+      }
+
+      function applyViewMode() {
+        document.body.classList.remove("force-mobile", "force-desktop");
+        if (state.viewMode === "mobile") {
+          document.body.classList.add("force-mobile");
+        } else if (state.viewMode === "desktop") {
+          document.body.classList.add("force-desktop");
+        }
+      }
+
+      function updateViewModeIcon() {
+        const icon = document.querySelector(".view-mode-icon");
+        if (!icon) {
+          return;
+        }
+        if (state.viewMode === "mobile") {
+          icon.innerHTML = '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>';
+        } else if (state.viewMode === "desktop") {
+          icon.innerHTML = '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>';
+        } else {
+          icon.innerHTML = '<rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/><path d="M5 8h14"/>';
+        }
       }
 
       function renderMode() {
@@ -5411,6 +5548,15 @@
           state.theme = state.theme === "dark" ? "light" : "dark";
           persist();
           render();
+        });
+
+        document.getElementById("viewModeBtn").addEventListener("click", function () {
+          const order = ["auto", "mobile", "desktop"];
+          const next = (order.indexOf(state.viewMode) + 1) % order.length;
+          state.viewMode = order[next];
+          persist();
+          render();
+          showToast(state.viewMode === "auto" ? "已恢复自适应视图" : (state.viewMode === "mobile" ? "已切换为手机版" : "已切换为电脑版"));
         });
 
         document.getElementById("settingsBtn").addEventListener("click", openSettingsModal);
