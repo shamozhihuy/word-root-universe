@@ -1991,6 +1991,17 @@
         min-width: 0;
       }
 
+      .modebar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+      }
+
+      .mode-btn {
+        width: 100%;
+        justify-content: center;
+      }
+
       .summary {
         grid-template-columns: 1fr;
       }
