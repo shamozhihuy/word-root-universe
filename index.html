@@ -60,6 +60,7 @@
       background: var(--bg);
       font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
       line-height: 1.55;
+      touch-action: pan-y;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
@@ -355,12 +356,17 @@
 
     body.force-mobile .modebar {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       overflow: visible;
+      touch-action: pan-y;
     }
 
     body.force-mobile .mode-btn {
       width: 100%;
+      min-height: 38px;
+      padding: 0 8px;
+      gap: 5px;
+      font-size: 12px;
       justify-content: center;
     }
 
@@ -1993,12 +1999,17 @@
 
       .modebar {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         overflow: visible;
+        touch-action: pan-y;
       }
 
       .mode-btn {
         width: 100%;
+        min-height: 38px;
+        padding: 0 8px;
+        gap: 5px;
+        font-size: 12px;
         justify-content: center;
       }
 
@@ -2090,12 +2101,17 @@
 
       .modebar {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         overflow: visible;
+        touch-action: pan-y;
       }
 
       .mode-btn {
         width: 100%;
+        min-height: 38px;
+        padding: 0 8px;
+        gap: 5px;
+        font-size: 12px;
         justify-content: center;
       }
 
