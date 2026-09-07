@@ -3580,7 +3580,7 @@
         }
 
         const rawTasks = Array.isArray(planData.today_plan) ? planData.today_plan : [];
-        const tasks = ensureRecognitionFirstTask(sortTrainingTasks(rawTasks));
+        const tasks = ensureRecognitionFirstTask(rawTasks);
         const generatedLabel = state.trainingPlan.generatedAt ? formatTrainingTime(state.trainingPlan.generatedAt) : "刚刚";
         main.innerHTML = '<div class="mode-toolbar">' +
           '<div class="eyebrow">专属训练 · <strong>' + escapeHtml(exam) + '</strong></div>' +
