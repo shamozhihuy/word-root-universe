@@ -2378,7 +2378,7 @@
       ];
 
       const WORDS = Array.isArray(window.ROOT_UNIVERSE_VOCAB) && window.ROOT_UNIVERSE_VOCAB.length
-        ? window.ROOT_UNIVERSE_VOCAB
+        ? window.ROOT_UNIVERSE_VOCAB.map(decodeVocabItem)
         : RAW.map(function (item, index) {
         const parts = item[7].map(function (part) {
           return { text: part[0], type: part[1], meaning: part[2] };
@@ -2408,6 +2408,27 @@
           }
         };
       });
+
+      function decodeVocabItem(item) {
+        if (!Array.isArray(item)) {
+          return item;
+        }
+        return {
+          id: item[0],
+          word: item[1],
+          phonetic: item[2],
+          definitionCn: item[3],
+          exampleSentence: item[4] || "",
+          examTypes: item[5] || [],
+          cefrLevel: item[6] || "",
+          difficultyLevel: item[7] || 1,
+          parts: item[8] || [],
+          roots: item[9] || [],
+          tags: item[10] || [],
+          isCustom: !!item[11],
+          rootAffix: item[12] || { root: "", meaning: "", affix: "" }
+        };
+      }
 
       const MODE_LABELS = {
         gallery: "词根画廊",
