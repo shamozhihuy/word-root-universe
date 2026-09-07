@@ -2847,7 +2847,7 @@
         if (!state.settings.autoSpeak) {
           return;
         }
-        if (["gallery", "spelling", "listening", "review", "speaking", "trainingCheck"].indexOf(state.mode) === -1) {
+        if (["gallery", "spelling", "review", "speaking", "trainingCheck"].indexOf(state.mode) === -1) {
           return;
         }
         const word = currentWord();
