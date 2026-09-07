@@ -3579,7 +3579,7 @@
         }
 
         const rawTasks = Array.isArray(planData.today_plan) ? planData.today_plan : [];
-        const tasks = sortTrainingTasks(rawTasks);
+        const tasks = ensureRecognitionFirstTask(sortTrainingTasks(rawTasks));
         const generatedLabel = state.trainingPlan.generatedAt ? formatTrainingTime(state.trainingPlan.generatedAt) : "刚刚";
         main.innerHTML = '<div class="mode-toolbar">' +
           '<div class="eyebrow">专属训练 · <strong>' + escapeHtml(exam) + '</strong></div>' +
@@ -3776,6 +3776,17 @@
           const rightMode = getTrainingModeForTask(right.task);
           return (order[leftMode] || 6) - (order[rightMode] || 6);
         });
+      }
+
+      function ensureRecognitionFirstTask(tasks) {
+        const hasRecognition = tasks.some(function (item) {
+          const mode = getTrainingModeForTask(item.task);
+          return mode === "preview" || mode === "gallery";
+        });
+        if (hasRecognition) {
+          return tasks;
+        }
+        return [{ task: "认识本组单词", minutes: 10, focus: "先浏览本轮词表" }].concat(tasks);
       }
 
       function parseTrainingPlan(raw) {
