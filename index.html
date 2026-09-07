@@ -3820,6 +3820,20 @@
         if (queue.length < limit) {
           getStudyQueue(exam).forEach(addWord);
         }
+        const cefrRank = { A1: 1, A2: 2, B1: 3, B2: 4, C1: 5, C2: 6 };
+        queue.sort(function (left, right) {
+          const leftRank = cefrRank[left.cefrLevel] || 3;
+          const rightRank = cefrRank[right.cefrLevel] || 3;
+          if (leftRank !== rightRank) {
+            return leftRank - rightRank;
+          }
+          const leftDifficulty = Number(left.difficultyLevel) || 1;
+          const rightDifficulty = Number(right.difficultyLevel) || 1;
+          if (leftDifficulty !== rightDifficulty) {
+            return leftDifficulty - rightDifficulty;
+          }
+          return String(left.word).localeCompare(String(right.word));
+        });
         return queue.slice(0, limit);
       }
 
