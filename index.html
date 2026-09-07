@@ -2440,6 +2440,7 @@
           dailyGoal: 30,
           trainingWordCount: 30,
           showCrossover: false,
+          autoSpeak: false,
           autoReview: true
         }
       };
@@ -2458,6 +2459,7 @@
       let navStack = [];
       let navIndex = -1;
       let trainingCheckSession = { score: 0, answered: false };
+      let lastAutoSpokenKey = "";
       const PREVIEW_PAGE_SIZE = 120;
       let assessmentSession = {
         step: 0,
@@ -2816,7 +2818,27 @@
         updateThemeIcon();
         applyViewMode();
         updateViewModeIcon();
+        autoSpeakCurrentWord();
         bindDynamicEvents();
+      }
+
+      function autoSpeakCurrentWord() {
+        if (!state.settings.autoSpeak) {
+          return;
+        }
+        if (["gallery", "spelling", "listening", "review", "speaking", "trainingCheck"].indexOf(state.mode) === -1) {
+          return;
+        }
+        const word = currentWord();
+        if (!word) {
+          return;
+        }
+        const key = state.mode + "|" + state.currentExam + "|" + word.id;
+        if (key === lastAutoSpokenKey) {
+          return;
+        }
+        lastAutoSpokenKey = key;
+        speakWord(word);
       }
 
       function saveStudyPosition(exam) {
@@ -5247,6 +5269,7 @@
           '<div class="field"><label>视图模式</label><select id="viewModeSetting"><option value="auto"' + (state.viewMode === "auto" ? " selected" : "") + '>自动适应</option><option value="mobile"' + (state.viewMode === "mobile" ? " selected" : "") + '>手机版</option><option value="desktop"' + (state.viewMode === "desktop" ? " selected" : "") + '>电脑版</option></select></div>' +
           '<div class="field"><label class="switch"><input type="checkbox" id="rootHintSetting"' + (state.settings.rootHint ? " checked" : "") + ' /> 默写时显示词根拆解提示</label></div>' +
           '<div class="field"><label class="switch"><input type="checkbox" id="showCrossoverSetting"' + (state.settings.showCrossover ? " checked" : "") + ' /> 显示词库穿越模式</label></div>' +
+          '<div class="field"><label class="switch"><input type="checkbox" id="autoSpeakSetting"' + (state.settings.autoSpeak ? " checked" : "") + ' /> 进入新单词时自动播放发音</label></div>' +
           '<div class="modal-actions">' +
           '<button class="ghost-btn" data-action="resetData">清空本地数据</button>' +
           '<button class="ghost-btn" data-action="exportData">导出数据 JSON</button>' +
@@ -5274,6 +5297,7 @@
         const notifications = document.getElementById("notifications").value === "1";
         const rootHint = document.getElementById("rootHintSetting").checked;
         const showCrossover = document.getElementById("showCrossoverSetting").checked;
+        const autoSpeak = document.getElementById("autoSpeakSetting").checked;
         const viewMode = document.getElementById("viewModeSetting").value;
         state.settings.apiProvider = provider;
         state.settings.apiKey = key;
@@ -5282,6 +5306,7 @@
         state.settings.notifications = notifications;
         state.settings.rootHint = rootHint;
         state.settings.showCrossover = showCrossover;
+        state.settings.autoSpeak = autoSpeak;
         state.viewMode = ["auto", "mobile", "desktop"].indexOf(viewMode) !== -1 ? viewMode : "auto";
         persist();
         closeModal();
