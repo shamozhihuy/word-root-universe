@@ -3038,7 +3038,7 @@
 
       function renderPreview(main) {
         const exam = state.currentExam;
-        const words = wordsForExam(exam);
+        const words = session.trainingQueue && session.queue.length ? session.queue : wordsForExam(exam);
         previewOffset = 0;
         if (!words.length) {
           main.innerHTML = emptyStateHtml("这个词库还没有单词", "上传 CSV 或切换到其他词库开始预览。", "上传词库", "openUpload");
@@ -3056,7 +3056,8 @@
 
       function getPreviewWords(query) {
         const q = String(query || "").trim().toLowerCase();
-        return wordsForExam(state.currentExam).filter(function (word) {
+        const source = session.trainingQueue && session.queue.length ? session.queue : wordsForExam(state.currentExam);
+        return source.filter(function (word) {
           if (!q) {
             return true;
           }
