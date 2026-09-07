@@ -353,6 +353,17 @@
       width: 100%;
     }
 
+    body.force-mobile .modebar {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      overflow: visible;
+    }
+
+    body.force-mobile .mode-btn {
+      width: 100%;
+      justify-content: center;
+    }
+
     body.force-mobile .card-face {
       padding: 28px 20px 30px;
     }
@@ -2064,6 +2075,17 @@
 
       .training-start {
         width: 100%;
+      }
+
+      .modebar {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        overflow: visible;
+      }
+
+      .mode-btn {
+        width: 100%;
+        justify-content: center;
       }
 
       .mode-toolbar {
