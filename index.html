@@ -2431,6 +2431,7 @@
         progress: {},
         customWords: [],
         trainingPlan: null,
+        lastSession: null,
         settings: {
           apiProvider: "deepseek",
           apiKey: "",
@@ -2445,6 +2446,7 @@
 
       let state = loadState();
       let session = createSession();
+      restoreLastSession();
       let listenTimer = null;
       let reminderTimer = null;
       let speechRecognition = null;
@@ -2818,12 +2820,40 @@
       }
 
       function saveStudyPosition(exam) {
-        if (session.trainingQueue || !session.queue || !session.queue.length) {
+        const order = session.queue ? session.queue.map(function (word) { return word.id; }) : [];
+        state.lastSession = {
+          exam: exam,
+          mode: state.mode,
+          queueOrder: order,
+          queueIndex: session.index || 0,
+          trainingQueue: !!session.trainingQueue
+        };
+        if (!session.trainingQueue && order.length) {
+          const progress = ensureProgress(exam);
+          progress.queueIndex = session.index;
+          progress.queueOrder = order;
+        }
+        persist();
+      }
+
+      function restoreLastSession() {
+        const snapshot = state.lastSession;
+        if (!snapshot) {
           return;
         }
-        const progress = ensureProgress(exam);
-        progress.queueIndex = session.index;
-        progress.queueOrder = session.queue.map(function (word) { return word.id; });
+        if (snapshot.exam) {
+          state.currentExam = snapshot.exam;
+        }
+        if (snapshot.mode) {
+          state.mode = snapshot.mode;
+        }
+        if (Array.isArray(snapshot.queueOrder)) {
+          session.queue = snapshot.queueOrder.map(function (id) {
+            return allWords().find(function (word) { return word.id === id; });
+          }).filter(Boolean);
+          session.index = Math.max(0, Math.min(Number(snapshot.queueIndex) || 0, session.queue.length - 1));
+          session.trainingQueue = !!snapshot.trainingQueue;
+        }
       }
 
       function renderExamOptions() {
@@ -3589,6 +3619,7 @@
         trainingCheckSession = { score: 0, answered: false };
         persist();
         render();
+        pushNavigation();
       }
 
       function renderTrainingCheck(main) {
@@ -3680,6 +3711,7 @@
             state.mode = "training";
             session = createSession();
             render();
+            pushNavigation();
           };
         });
         document.querySelectorAll("[data-action='next-training-round']").forEach(function (button) {
@@ -3689,6 +3721,7 @@
             session = createSession();
             persist();
             render();
+            pushNavigation();
             showToast("可以生成下一轮专属训练");
           };
         });
@@ -4695,6 +4728,7 @@
             state.mode = "training";
             session = createSession();
             render();
+            pushNavigation();
           };
         }
       }
@@ -4709,6 +4743,7 @@
             session.index = 0;
             persist();
             render();
+            pushNavigation();
           };
         });
         document.querySelectorAll("[data-action='goto-teacher']").forEach(function (button) {
@@ -4716,6 +4751,7 @@
             state.mode = "teacher";
             session = createSession();
             render();
+            pushNavigation();
           };
         });
         document.querySelectorAll("[data-action='retakeAssessment']").forEach(function (button) {
