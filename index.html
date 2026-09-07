@@ -3886,25 +3886,10 @@
         if (!overlay) {
           return;
         }
-        if (!state.assessment && !isWeChatBrowser() && canUseLocalStorage()) {
+        if (!state.assessment) {
           openAssessment();
         } else {
           overlay.classList.remove("open");
-        }
-      }
-
-      function isWeChatBrowser() {
-        return /MicroMessenger/i.test(navigator.userAgent || "");
-      }
-
-      function canUseLocalStorage() {
-        try {
-          const key = "__storage_test__";
-          localStorage.setItem(key, "1");
-          localStorage.removeItem(key);
-          return true;
-        } catch (error) {
-          return false;
         }
       }
 
