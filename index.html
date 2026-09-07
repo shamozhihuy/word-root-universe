@@ -2418,7 +2418,8 @@
         review: "智能复习",
         speaking: "口语跟读",
         teacher: "AI 老师",
-        training: "专属训练"
+        training: "专属训练",
+        trainingCheck: "训练检测"
       };
 
       const defaultState = {
@@ -2436,6 +2437,8 @@
           rootHint: true,
           notifications: false,
           dailyGoal: 30,
+          trainingWordCount: 30,
+          showCrossover: false,
           autoReview: true
         }
       };
@@ -2452,6 +2455,7 @@
       let lastNavKey = "";
       let navStack = [];
       let navIndex = -1;
+      let trainingCheckSession = { score: 0, answered: false };
       const PREVIEW_PAGE_SIZE = 120;
       let assessmentSession = {
         step: 0,
@@ -2506,6 +2510,7 @@
           streak: 0,
           attempted: false,
           listenAnswered: false,
+          trainingQueue: false,
           crossoverExam: "",
           crossoverWord: null
         };
@@ -2549,8 +2554,16 @@
             attempts: 0,
             correct: 0,
             learnedAt: {},
-            streak: {}
+            streak: {},
+            queueOrder: [],
+            queueIndex: 0
           };
+        }
+        if (!Array.isArray(state.progress[exam].queueOrder)) {
+          state.progress[exam].queueOrder = [];
+        }
+        if (typeof state.progress[exam].queueIndex !== "number") {
+          state.progress[exam].queueIndex = 0;
         }
         return state.progress[exam];
       }
@@ -2663,26 +2676,22 @@
 
       function getStudyQueue(exam) {
         const progress = ensureProgress(exam);
-        const mastered = {};
-        progress.mastered.forEach(function (id) { mastered[id] = true; });
         const words = wordsForExam(exam);
         if (!words.length) {
           return [];
         }
-        const pending = words.filter(function (word) { return !mastered[word.id]; });
-        const learned = words.filter(function (word) { return mastered[word.id]; });
-        const dueMap = {};
-        getDueWords(exam).forEach(function (word) {
-          dueMap[word.id] = true;
+        const validIds = {};
+        words.forEach(function (word) {
+          validIds[word.id] = true;
         });
-        const duePending = pending.filter(function (word) { return dueMap[word.id]; });
-        const dueLearned = learned.filter(function (word) { return dueMap[word.id]; });
-        const normalPending = pending.filter(function (word) { return !dueMap[word.id]; });
-        const normalLearned = learned.filter(function (word) { return !dueMap[word.id]; });
-        return shuffle(duePending)
-          .concat(shuffle(normalPending))
-          .concat(shuffle(dueLearned))
-          .concat(shuffle(normalLearned));
+        let order = progress.queueOrder.filter(function (id) { return validIds[id]; });
+        if (order.length !== words.length) {
+          order = words.map(function (word) { return word.id; });
+          progress.queueOrder = order.slice();
+        }
+        return order.map(function (id) {
+          return allWords().find(function (word) { return word.id === id; });
+        }).filter(Boolean);
       }
 
       function currentWord() {
@@ -2690,6 +2699,22 @@
           return null;
         }
         return session.queue[session.index] || null;
+      }
+
+      function restoreQueuePosition(exam) {
+        if (session.trainingQueue || !session.queue.length) {
+          return;
+        }
+        const progress = ensureProgress(exam);
+        session.index = Math.max(0, Math.min(progress.queueIndex || 0, session.queue.length - 1));
+      }
+
+      function getSavedQueueIndex(exam) {
+        if (!session.queue.length) {
+          return 0;
+        }
+        const progress = ensureProgress(exam);
+        return Math.max(0, Math.min(progress.queueIndex || 0, session.queue.length - 1));
       }
 
       function goToWord(offset) {
@@ -2700,6 +2725,19 @@
         session.flipped = false;
         session.attempted = false;
         render();
+      }
+
+      function reshuffleStudyQueue(exam) {
+        const progress = ensureProgress(exam);
+        const words = wordsForExam(exam);
+        progress.queueOrder = shuffle(words.map(function (word) { return word.id; }));
+        progress.queueIndex = 0;
+        session.queue = getStudyQueue(exam);
+        session.index = 0;
+        session.flipped = false;
+        persist();
+        render();
+        showToast("已刷新学习顺序");
       }
 
       function buildRootStats(exam, includeCross) {
@@ -2772,10 +2810,20 @@
         renderSummary();
         renderModebar();
         renderMode();
+        saveStudyPosition(state.currentExam);
         updateThemeIcon();
         applyViewMode();
         updateViewModeIcon();
         bindDynamicEvents();
+      }
+
+      function saveStudyPosition(exam) {
+        if (session.trainingQueue || !session.queue || !session.queue.length) {
+          return;
+        }
+        const progress = ensureProgress(exam);
+        progress.queueIndex = session.index;
+        progress.queueOrder = session.queue.map(function (word) { return word.id; });
       }
 
       function renderExamOptions() {
@@ -2831,6 +2879,10 @@
         document.querySelectorAll(".mode-btn[data-mode]").forEach(function (button) {
           button.classList.toggle("active", button.dataset.mode === state.mode);
         });
+        const crossover = document.querySelector('.mode-btn[data-mode="crossover"]');
+        if (crossover) {
+          crossover.style.display = state.settings.showCrossover ? "" : "none";
+        }
       }
 
       function updateThemeIcon() {
@@ -2889,6 +2941,8 @@
           renderTeacher(main);
         } else if (state.mode === "training") {
           renderTraining(main);
+        } else if (state.mode === "trainingCheck") {
+          renderTrainingCheck(main);
         } else {
           main.innerHTML = "";
         }
@@ -2901,18 +2955,18 @@
           main.innerHTML = emptyStateHtml("这个词库还没有单词", "上传 CSV 或切换到其他词库开始学习。", "上传词库", "openUpload");
           return;
         }
-        if (!session.queue.length || session.queue[0] && wordsForExam(exam).indexOf(session.queue[0]) === -1 && state.customWords.indexOf(session.queue[0]) === -1) {
+        if (!session.trainingQueue && (!session.queue.length || session.queue[0] && wordsForExam(exam).indexOf(session.queue[0]) === -1 && state.customWords.indexOf(session.queue[0]) === -1)) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
-        if (session.queue.length && session.queue[0] && session.queue[0].examTypes && session.queue[0].examTypes.indexOf(exam) === -1 && state.currentExam !== "自定义") {
+        if (!session.trainingQueue && session.queue.length && session.queue[0] && session.queue[0].examTypes && session.queue[0].examTypes.indexOf(exam) === -1 && state.currentExam !== "自定义") {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         let word = currentWord();
         if (!word) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
           word = currentWord();
         }
         if (word) {
@@ -2923,7 +2977,8 @@
         const dailyRoot = getDailyRoot(exam);
         main.innerHTML = '<div class="mode-toolbar">' +
           '<div class="eyebrow">词根画廊 · <strong>' + escapeHtml(exam) + "</strong></div>" +
-          '<label class="switch"><input type="checkbox" id="crossRootToggle" checked /> 显示跨词库同根词</label>' +
+          '<div class="mode-toolbar-actions"><label class="switch"><input type="checkbox" id="crossRootToggle" checked /> 显示跨词库同根词</label>' +
+          '<button class="ghost-btn" data-action="reshuffleQueue">刷新顺序</button></div>' +
           "</div>" +
           renderDailyRoot(dailyRoot) +
           renderCard(word, false) +
@@ -3142,14 +3197,14 @@
           main.innerHTML = emptyStateHtml("这个词库还没有单词", "上传 CSV 或切换到其他词库开始学习。", "上传词库", "openUpload");
           return;
         }
-        if (!session.queue.length) {
+        if (!session.trainingQueue && !session.queue.length) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         const word = currentWord();
         if (!word) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         const freshWord = session.queue[session.index];
         if (freshWord) {
@@ -3194,14 +3249,14 @@
           main.innerHTML = emptyStateHtml("这个词库还没有单词", "上传 CSV 或切换到其他词库开始学习。", "上传词库", "openUpload");
           return;
         }
-        if (!session.queue.length) {
+        if (!session.trainingQueue && !session.queue.length) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         let word = currentWord();
         if (!word) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
           word = currentWord();
         }
         if (word) {
@@ -3428,15 +3483,15 @@
           main.innerHTML = emptyStateHtml("这个还没有单词", "先导入或切换到其他词库，再开始口语练习。", "上传词库", "openUpload");
           return;
         }
-        if (!session.queue.length) {
+        if (!session.trainingQueue && !session.queue.length) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         session.flipped = false;
         const word = currentWord();
         if (!word) {
           session.queue = getStudyQueue(exam);
-          session.index = 0;
+          session.index = getSavedQueueIndex(exam);
         }
         const freshWord = session.queue[session.index] || word;
         markSeen(exam, freshWord.id);
@@ -3505,6 +3560,7 @@
           '<div class="teacher-grid">' +
           '<div class="teacher-card"><h4>水平总结</h4><p>' + escapeHtml(planData.level_summary || "未返回") + '</p></div>' +
           '<div class="teacher-card"><h4>薄弱点分析</h4><p>' + escapeHtml(planData.weakness_analysis || "未返回") + '</p></div>' +
+          '<div class="teacher-card"><h4>本轮单词</h4><p>共 ' + getTrainingWordQueue().length + ' 词，可在设置中调整数量。</p></div>' +
           '</div>' +
           '<div class="training-section">' +
           '<h3 class="training-section-title">今日训练任务</h3>' +
@@ -3519,8 +3575,123 @@
           '<div class="answer-actions">' +
           '<button class="ghost-btn" data-action="goto-teacher">重新生成计划</button>' +
           '<button class="ghost-btn" data-action="retakeAssessment">重新测评</button>' +
+          '<button class="primary-btn" data-action="start-training-check">完成训练，进入检测</button>' +
           '</div>' +
           '</div>';
+      }
+
+      function startTrainingCheck() {
+        state.mode = "trainingCheck";
+        session = createSession();
+        session.trainingQueue = true;
+        session.queue = getTrainingWordQueue();
+        session.index = 0;
+        trainingCheckSession = { score: 0, answered: false };
+        persist();
+        render();
+      }
+
+      function renderTrainingCheck(main) {
+        const exam = state.currentExam;
+        const word = currentWord();
+        if (!word) {
+          const total = session.queue.length;
+          main.innerHTML = '<div class="mode-toolbar"><div class="eyebrow">训练检测 · <strong>' + escapeHtml(exam) + '</strong></div></div>' +
+            '<div class="teacher-panel"><div class="teacher-head"><div><h2 class="teacher-title">本轮检测完成</h2><div class="teacher-sub">检测分数：' + trainingCheckSession.score + ' / ' + total + '</div></div></div>' +
+            '<div class="answer-actions">' +
+            '<button class="ghost-btn" data-action="back-to-training">回到专属训练</button>' +
+            '<button class="primary-btn" data-action="next-training-round">进入下一次专属训练</button>' +
+            '</div></div>';
+          return;
+        }
+        trainingCheckSession.answered = false;
+        const options = makeListenOptions(word, exam);
+        main.innerHTML = '<div class="mode-toolbar"><div class="eyebrow">训练检测 · <strong>' + escapeHtml(exam) + '</strong></div>' +
+          '<div class="exam-pill">' + (session.index + 1) + ' / ' + session.queue.length + '</div></div>' +
+          '<div class="listen-stage">' +
+          '<div class="speak-target"><div class="card-word">' + escapeHtml(word.word) + '</div><div class="card-phonetic">' + escapeHtml(word.phonetic) + '</div></div>' +
+          '<div class="listen-options">' + options.map(function (option, index) {
+            return '<button class="listen-option" data-training-option="' + index + '">' + escapeHtml(option.text) + '</button>';
+          }).join("") + '</div>' +
+          '<div class="feedback" id="trainingCheckFeedback"></div>' +
+          '<div class="answer-actions"><button class="primary-btn" id="trainingCheckNext">下一题</button></div>' +
+          '</div>';
+      }
+
+      function handleTrainingCheckAnswer(selectedIndex) {
+        if (trainingCheckSession.answered) {
+          return;
+        }
+        const word = currentWord();
+        if (!word) {
+          return;
+        }
+        const options = makeListenOptions(word, state.currentExam);
+        const correct = options[selectedIndex] && options[selectedIndex].correct;
+        trainingCheckSession.answered = true;
+        if (correct) {
+          trainingCheckSession.score += 1;
+        }
+        recordAttempt(state.currentExam, correct, word.id, false);
+        if (!correct) {
+          addMistake(state.currentExam, word.id);
+        }
+        const buttons = document.querySelectorAll("[data-training-option]");
+        buttons.forEach(function (button, index) {
+          if (options[index] && options[index].correct) {
+            button.classList.add("correct");
+          } else if (index === selectedIndex) {
+            button.classList.add("wrong");
+          }
+          button.disabled = true;
+        });
+        const feedback = document.getElementById("trainingCheckFeedback");
+        if (feedback) {
+          feedback.textContent = correct ? "回答正确" : "没关系，这个单词会继续进入复习队列。";
+          feedback.className = "feedback " + (correct ? "correct" : "wrong");
+        }
+        persist();
+      }
+
+      function bindTrainingCheckEvents() {
+        document.querySelectorAll("[data-training-option]").forEach(function (button) {
+          button.onclick = function () {
+            handleTrainingCheckAnswer(Number(button.dataset.trainingOption));
+          };
+        });
+        const next = document.getElementById("trainingCheckNext");
+        if (next) {
+          next.onclick = function () {
+            if (!trainingCheckSession.answered && currentWord()) {
+              showToast("请先选择一个答案");
+              return;
+            }
+            if (session.index < session.queue.length - 1) {
+              session.index += 1;
+              render();
+            } else {
+              session.index = session.queue.length;
+              render();
+            }
+          };
+        }
+        document.querySelectorAll("[data-action='back-to-training']").forEach(function (button) {
+          button.onclick = function () {
+            state.mode = "training";
+            session = createSession();
+            render();
+          };
+        });
+        document.querySelectorAll("[data-action='next-training-round']").forEach(function (button) {
+          button.onclick = function () {
+            state.mode = "teacher";
+            state.trainingPlan = null;
+            session = createSession();
+            persist();
+            render();
+            showToast("可以生成下一轮专属训练");
+          };
+        });
       }
 
       function renderTrainingTask(item, index) {
@@ -3591,11 +3762,41 @@
         return parseTrainingPlan(state.trainingPlan.raw);
       }
 
+      function getTrainingWordQueue() {
+        const exam = state.currentExam;
+        const limit = Math.max(5, Math.min(200, Number(state.settings.trainingWordCount) || 30));
+        const seen = {};
+        const queue = [];
+        const addWord = function (word) {
+          if (word && !seen[word.id]) {
+            seen[word.id] = true;
+            queue.push(word);
+          }
+        };
+        if (state.trainingPlan && Array.isArray(state.trainingPlan.targetWords)) {
+          state.trainingPlan.targetWords.forEach(function (target) {
+            const word = allWords().find(function (item) {
+              return item.word.toLowerCase() === String(target || "").toLowerCase();
+            });
+            addWord(word);
+          });
+        }
+        if (queue.length < limit) {
+          getDueWords(exam).forEach(addWord);
+        }
+        if (queue.length < limit) {
+          getStudyQueue(exam).forEach(addWord);
+        }
+        return queue.slice(0, limit);
+      }
+
       function storeTrainingPlan(raw) {
+        const parsed = parseTrainingPlan(raw);
         state.trainingPlan = {
           exam: state.currentExam,
           raw: String(raw || ""),
-          generatedAt: Date.now()
+          generatedAt: Date.now(),
+          targetWords: parsed && Array.isArray(parsed.target_words) ? parsed.target_words : []
         };
         persist();
       }
@@ -4100,6 +4301,12 @@
           button.onclick = function () { goToWord(1); };
         });
 
+        document.querySelectorAll("[data-action='reshuffleQueue']").forEach(function (button) {
+          button.onclick = function () {
+            reshuffleStudyQueue(state.currentExam);
+          };
+        });
+
         document.querySelectorAll("[data-action='openUpload']").forEach(function (button) {
           button.onclick = openUploadModal;
         });
@@ -4188,6 +4395,10 @@
 
         if (state.mode === "training") {
           bindTrainingEvents();
+        }
+
+        if (state.mode === "trainingCheck") {
+          bindTrainingCheckEvents();
         }
 
         if (state.mode === "crossover") {
@@ -4493,6 +4704,9 @@
           button.onclick = function () {
             state.mode = button.dataset.trainingMode;
             session = createSession();
+            session.trainingQueue = true;
+            session.queue = getTrainingWordQueue();
+            session.index = 0;
             persist();
             render();
           };
@@ -4507,6 +4721,11 @@
         document.querySelectorAll("[data-action='retakeAssessment']").forEach(function (button) {
           button.onclick = function () {
             openAssessment();
+          };
+        });
+        document.querySelectorAll("[data-action='start-training-check']").forEach(function (button) {
+          button.onclick = function () {
+            startTrainingCheck();
           };
         });
       }
@@ -4689,7 +4908,7 @@
           ? "https://api.openai.com/v1/chat/completions"
           : "https://api.deepseek.com/chat/completions";
         const model = provider === "openai" ? "gpt-4o-mini" : "deepseek-chat";
-        const systemPrompt = "你是一名英语私人教练，擅长根据词汇量、正确率、错词和遗忘曲线设计短期训练方案。请只返回 JSON，字段包括：level_summary、weakness_analysis、today_plan（数组，每项含 task/minutes/focus）、speaking_drill、exam_advice。today_plan 必须按学习规律排序：先认识单词或词根，再听音辨义，再拼写默写，最后口语输出。基础薄弱时第一项不得安排默写。";
+        const systemPrompt = "你是一名英语私人教练，擅长根据词汇量、正确率、错词和遗忘曲线设计短期训练方案。请只返回 JSON，字段包括：level_summary、weakness_analysis、today_plan（数组，每项含 task/minutes/focus）、target_words（字符串数组，按学习顺序排列）、speaking_drill、exam_advice。today_plan 必须按学习规律排序：先认识单词或词根，再听音辨义，再拼写默写，最后口语输出。基础薄弱时第一项不得安排默写。target_words 只能从当前词库选择，数量必须等于用户指定数量，不能重复。";
         const userPrompt = "当前词库：" + exam +
           "；已学习：" + diagnostics.seenCount +
           "；已掌握：" + diagnostics.masteredCount +
@@ -4698,6 +4917,7 @@
           "；入学测评：" + getAssessmentSummary() +
           "；近期错词：" + diagnostics.recentMistakes.join("、") +
           "；薄弱方向：" + diagnostics.weakness +
+          "；专属训练词数：" + state.settings.trainingWordCount +
           "。请给出针对性训练计划。";
         return fetch(endpoint, {
           method: "POST",
@@ -4938,9 +5158,11 @@
           '<div class="field"><label>AI 服务商</label><select id="apiProvider"><option value="deepseek"' + (state.settings.apiProvider === "deepseek" ? " selected" : "") + '>DeepSeek</option><option value="openai"' + (state.settings.apiProvider === "openai" ? " selected" : "") + ">OpenAI</option></select></div>" +
           '<div class="field"><label>API Key</label><input id="apiKey" type="password" value="' + escapeAttr(state.settings.apiKey || "") + '" placeholder="sk-..." /></div>' +
           '<div class="field-row"><div class="field"><label>每日目标</label><input id="dailyGoal" type="number" min="5" max="200" value="' + Number(state.settings.dailyGoal || 30) + '" /></div>' +
+          '<div class="field"><label>专属训练词数</label><input id="trainingWordCount" type="number" min="5" max="200" value="' + Number(state.settings.trainingWordCount || 30) + '" /></div></div>' +
           '<div class="field"><label>复习提醒</label><select id="notifications"><option value="0"' + (state.settings.notifications ? "" : " selected") + '>关闭</option><option value="1"' + (state.settings.notifications ? " selected" : "") + '>开启</option></select></div></div>' +
           '<div class="field"><label>视图模式</label><select id="viewModeSetting"><option value="auto"' + (state.viewMode === "auto" ? " selected" : "") + '>自动适应</option><option value="mobile"' + (state.viewMode === "mobile" ? " selected" : "") + '>手机版</option><option value="desktop"' + (state.viewMode === "desktop" ? " selected" : "") + '>电脑版</option></select></div>' +
           '<div class="field"><label class="switch"><input type="checkbox" id="rootHintSetting"' + (state.settings.rootHint ? " checked" : "") + ' /> 默写时显示词根拆解提示</label></div>' +
+          '<div class="field"><label class="switch"><input type="checkbox" id="showCrossoverSetting"' + (state.settings.showCrossover ? " checked" : "") + ' /> 显示词库穿越模式</label></div>' +
           '<div class="modal-actions">' +
           '<button class="ghost-btn" data-action="resetData">清空本地数据</button>' +
           '<button class="ghost-btn" data-action="exportData">导出数据 JSON</button>' +
@@ -4964,14 +5186,18 @@
         const provider = document.getElementById("apiProvider").value;
         const key = document.getElementById("apiKey").value.trim();
         const goal = Number(document.getElementById("dailyGoal").value) || 30;
+        const trainingWordCount = Number(document.getElementById("trainingWordCount").value) || 30;
         const notifications = document.getElementById("notifications").value === "1";
         const rootHint = document.getElementById("rootHintSetting").checked;
+        const showCrossover = document.getElementById("showCrossoverSetting").checked;
         const viewMode = document.getElementById("viewModeSetting").value;
         state.settings.apiProvider = provider;
         state.settings.apiKey = key;
         state.settings.dailyGoal = Math.min(200, Math.max(5, goal));
+        state.settings.trainingWordCount = Math.min(200, Math.max(5, trainingWordCount));
         state.settings.notifications = notifications;
         state.settings.rootHint = rootHint;
+        state.settings.showCrossover = showCrossover;
         state.viewMode = ["auto", "mobile", "desktop"].indexOf(viewMode) !== -1 ? viewMode : "auto";
         persist();
         closeModal();
@@ -5512,6 +5738,17 @@
       function handleWordSearch(query) {
         const q = String(query || "").trim();
         if (!q) {
+          return;
+        }
+        if (/^\d+$/.test(q) && session.queue.length) {
+          const targetIndex = Math.max(0, Math.min(Number(q) - 1, session.queue.length - 1));
+          session.index = targetIndex;
+          session.flipped = false;
+          session.attempted = false;
+          saveStudyPosition(state.currentExam);
+          persist();
+          render();
+          showToast("已定位到第 " + (targetIndex + 1) + " 个词：" + session.queue[targetIndex].word);
           return;
         }
         const exact = allWords().find(function (word) {
