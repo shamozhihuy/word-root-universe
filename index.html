@@ -49,22 +49,17 @@
     }
 
     html {
-      height: 100%;
       min-height: 100%;
       background: var(--bg);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
     }
 
     body {
       margin: 0;
       min-height: 100vh;
-      overflow-x: hidden;
       color: var(--ink);
       background: var(--bg);
       font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
       line-height: 1.55;
-      touch-action: pan-y;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
@@ -356,22 +351,6 @@
 
     body.force-mobile .training-start {
       width: 100%;
-    }
-
-    body.force-mobile .modebar {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      overflow: visible;
-      touch-action: pan-y;
-    }
-
-    body.force-mobile .mode-btn {
-      width: 100%;
-      min-height: 38px;
-      padding: 0 8px;
-      gap: 5px;
-      font-size: 12px;
-      justify-content: center;
     }
 
     body.force-mobile .card-face {
@@ -2001,22 +1980,6 @@
         min-width: 0;
       }
 
-      .modebar {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        overflow: visible;
-        touch-action: pan-y;
-      }
-
-      .mode-btn {
-        width: 100%;
-        min-height: 38px;
-        padding: 0 8px;
-        gap: 5px;
-        font-size: 12px;
-        justify-content: center;
-      }
-
       .summary {
         grid-template-columns: 1fr;
       }
@@ -2101,22 +2064,6 @@
 
       .training-start {
         width: 100%;
-      }
-
-      .modebar {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        overflow: visible;
-        touch-action: pan-y;
-      }
-
-      .mode-btn {
-        width: 100%;
-        min-height: 38px;
-        padding: 0 8px;
-        gap: 5px;
-        font-size: 12px;
-        justify-content: center;
       }
 
       .mode-toolbar {
