@@ -2138,7 +2138,7 @@
         <div class="exam-dropdown" id="examDropdown">
           <button class="exam-trigger" id="examTrigger" type="button" aria-haspopup="listbox" aria-expanded="false">
             <span class="exam-label">当前词库</span>
-            <strong id="examTriggerText">A级</strong>
+            <strong id="examTriggerText">PETS3</strong>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
           </button>
           <div class="exam-menu" id="examMenu" role="listbox"></div>
@@ -2170,7 +2170,7 @@
     <section class="summary" aria-label="学习看板">
       <div class="summary-main">
         <div class="summary-head">
-          <div class="summary-title">当前词库<strong id="summaryExam">A级</strong><span class="summary-count" id="summaryCount">0/0</span></div>
+          <div class="summary-title">当前词库<strong id="summaryExam">PETS3</strong><span class="summary-count" id="summaryCount">0/0</span></div>
           <div class="summary-title" id="summaryModeLabel">词根画廊</div>
         </div>
         <div class="progress-track" aria-label="今日目标进度">
@@ -2270,7 +2270,7 @@
     (function () {
       "use strict";
 
-      const EXAM_TYPES = ["小学", "初中", "高中", "A级", "CET-4", "CET-6", "考研", "雅思", "托福", "常用", "自定义"];
+      const EXAM_TYPES = ["小学", "初中", "高中", "PETS3", "CET-4", "CET-6", "考研", "雅思", "托福", "常用", "自定义"];
       const STORAGE_KEY = "root-universe-v2";
 
       /*
@@ -2278,98 +2278,98 @@
        * This demo set keeps every exam meaningful while making the global root index run correctly.
        */
       const RAW = [
-        ["predict", "/prɪˈdɪkt/", "预测；预言", "Economists predict steady growth this year.（经济学家预测今年会稳步增长。）", ["A级", "CET-4"], "B1", 2, [["pre-", "prefix", "前面"], ["dict", "root", "说"]], ["高频", "真题"]],
-        ["dictate", "/ˈdɪkteɪt/", "口述；命令；支配", "Do not let fear dictate your choices.（不要让恐惧支配你的选择。）", ["A级", "CET-4"], "B1", 2, [["dict", "root", "说"], ["-ate", "suffix", "动词"]], ["高频"]],
-        ["dictionary", "/ˈdɪkʃəneri/", "词典，字典", "Look up the word in a dictionary.（在词典里查一下这个单词。）", ["A级"], "A2", 1, [["dict", "root", "说"], ["-ary", "suffix", "名词"]], ["基础"]],
+        ["predict", "/prɪˈdɪkt/", "预测；预言", "Economists predict steady growth this year.（经济学家预测今年会稳步增长。）", ["PETS3", "CET-4"], "B1", 2, [["pre-", "prefix", "前面"], ["dict", "root", "说"]], ["高频", "真题"]],
+        ["dictate", "/ˈdɪkteɪt/", "口述；命令；支配", "Do not let fear dictate your choices.（不要让恐惧支配你的选择。）", ["PETS3", "CET-4"], "B1", 2, [["dict", "root", "说"], ["-ate", "suffix", "动词"]], ["高频"]],
+        ["dictionary", "/ˈdɪkʃəneri/", "词典，字典", "Look up the word in a dictionary.（在词典里查一下这个单词。）", ["PETS3"], "A2", 1, [["dict", "root", "说"], ["-ary", "suffix", "名词"]], ["基础"]],
         ["contradict", "/ˌkɑːntrəˈdɪkt/", "反驳；与…矛盾", "The two reports contradict each other.（这两份报告互相矛盾。）", ["考研", "雅思"], "C1", 3, [["contra-", "prefix", "相反"], ["dict", "root", "说"]], ["真题"]],
         ["verdict", "/ˈvɜːrdɪkt/", "裁决；结论", "The jury returned a guilty verdict.（陪审团作出了有罪裁决。）", ["考研", "托福"], "C1", 3, [["ver", "root", "真实"], ["dict", "root", "说"]], ["真题"]],
-        ["respect", "/rɪˈspekt/", "尊敬；尊重；方面", "We should respect different opinions.（我们应该尊重不同观点。）", ["A级", "CET-4"], "B1", 2, [["re-", "prefix", "再次"], ["spect", "root", "看"]], ["高频"]],
+        ["respect", "/rɪˈspekt/", "尊敬；尊重；方面", "We should respect different opinions.（我们应该尊重不同观点。）", ["PETS3", "CET-4"], "B1", 2, [["re-", "prefix", "再次"], ["spect", "root", "看"]], ["高频"]],
         ["inspect", "/ɪnˈspekt/", "检查；视察", "Officials came to inspect the factory.（官员来检查工厂。）", ["CET-4", "考研"], "B2", 3, [["in-", "prefix", "向内"], ["spect", "root", "看"]], ["真题"]],
         ["spectator", "/ˈspekteɪtər/", "观众；旁观者", "Thousands of spectators watched the match.（数千名观众观看了比赛。）", ["CET-4", "雅思"], "B2", 3, [["spect", "root", "看"], ["-ator", "suffix", "人"]], ["高频"]],
         ["spectacular", "/spekˈtækjələr/", "壮观的；惊人的", "The sunrise over the sea was spectacular.（海上日出非常壮观。）", ["CET-4", "托福"], "B2", 3, [["spect", "root", "看"], ["-acular", "suffix", "形容词"]], ["高频"]],
         ["circumspect", "/ˈsɜːrkəmspekt/", "谨慎的；周到的", "Be circumspect before signing the contract.（签合同前要谨慎。）", ["雅思", "托福"], "C1", 4, [["circum-", "prefix", "周围"], ["spect", "root", "看"]], ["高级"]],
         ["prospect", "/ˈprɑːspekt/", "前景；可能性；展望", "The job offers excellent prospects for promotion.（这份工作晋升前景很好。）", ["CET-4", "考研"], "B2", 3, [["pro-", "prefix", "向前"], ["spect", "root", "看"]], ["真题"]],
-        ["suspect", "/səˈspekt/", "怀疑；嫌疑犯", "I suspect that he is telling the truth.（我怀疑他说的是真话。）", ["A级", "CET-4"], "B2", 2, [["sus-", "prefix", "下面"], ["spect", "root", "看"]], ["高频"]],
-        ["import", "/ɪmˈpɔːrt/", "进口；输入；重要性", "The country imports a large amount of oil.（这个国家进口大量石油。）", ["A级", "CET-4"], "B1", 1, [["im-", "prefix", "向内"], ["port", "root", "携带"]], ["基础"]],
-        ["export", "/ˈekspɔːrt/", "出口；输出", "China exports many electronic products.（中国出口许多电子产品。）", ["A级", "CET-4"], "B1", 1, [["ex-", "prefix", "向外"], ["port", "root", "携带"]], ["基础"]],
-        ["transport", "/ˈtrænspɔːrt/", "运输；交通", "The goods were transported by rail.（货物通过铁路运输。）", ["A级", "CET-4"], "B1", 2, [["trans-", "prefix", "跨越"], ["port", "root", "携带"]], ["高频"]],
+        ["suspect", "/səˈspekt/", "怀疑；嫌疑犯", "I suspect that he is telling the truth.（我怀疑他说的是真话。）", ["PETS3", "CET-4"], "B2", 2, [["sus-", "prefix", "下面"], ["spect", "root", "看"]], ["高频"]],
+        ["import", "/ɪmˈpɔːrt/", "进口；输入；重要性", "The country imports a large amount of oil.（这个国家进口大量石油。）", ["PETS3", "CET-4"], "B1", 1, [["im-", "prefix", "向内"], ["port", "root", "携带"]], ["基础"]],
+        ["export", "/ˈekspɔːrt/", "出口；输出", "China exports many electronic products.（中国出口许多电子产品。）", ["PETS3", "CET-4"], "B1", 1, [["ex-", "prefix", "向外"], ["port", "root", "携带"]], ["基础"]],
+        ["transport", "/ˈtrænspɔːrt/", "运输；交通", "The goods were transported by rail.（货物通过铁路运输。）", ["PETS3", "CET-4"], "B1", 2, [["trans-", "prefix", "跨越"], ["port", "root", "携带"]], ["高频"]],
         ["portable", "/ˈpɔːrtəbl/", "便携的；手提的", "A portable charger is useful when traveling.（旅行时便携充电器很有用。）", ["CET-4", "托福"], "B2", 3, [["port", "root", "携带"], ["-able", "suffix", "可…的"]], ["高频"]],
-        ["report", "/rɪˈpɔːrt/", "报告；报道", "She wrote a detailed report on the survey.（她写了一份详细的调查报告。）", ["A级"], "A2", 1, [["re-", "prefix", "回"], ["port", "root", "携带"]], ["基础"]],
-        ["support", "/səˈpɔːrt/", "支持；支撑；供养", "Your support means a lot to me.（你的支持对我很重要。）", ["A级"], "A2", 1, [["sup-", "prefix", "下面"], ["port", "root", "携带"]], ["基础"]],
-        ["vision", "/ˈvɪʒn/", "视力；愿景；远见", "The company has a clear vision for the future.（公司对未来有清晰的愿景。）", ["A级", "CET-4"], "B1", 2, [["vis", "root", "看"], ["-ion", "suffix", "名词"]], ["高频"]],
-        ["visible", "/ˈvɪzəbl/", "可见的；明显的", "The mountain is visible from here.（从这里可以看见那座山。）", ["A级", "CET-4"], "B1", 2, [["vis", "root", "看"], ["-ible", "suffix", "可…的"]], ["高频"]],
+        ["report", "/rɪˈpɔːrt/", "报告；报道", "She wrote a detailed report on the survey.（她写了一份详细的调查报告。）", ["PETS3"], "A2", 1, [["re-", "prefix", "回"], ["port", "root", "携带"]], ["基础"]],
+        ["support", "/səˈpɔːrt/", "支持；支撑；供养", "Your support means a lot to me.（你的支持对我很重要。）", ["PETS3"], "A2", 1, [["sup-", "prefix", "下面"], ["port", "root", "携带"]], ["基础"]],
+        ["vision", "/ˈvɪʒn/", "视力；愿景；远见", "The company has a clear vision for the future.（公司对未来有清晰的愿景。）", ["PETS3", "CET-4"], "B1", 2, [["vis", "root", "看"], ["-ion", "suffix", "名词"]], ["高频"]],
+        ["visible", "/ˈvɪzəbl/", "可见的；明显的", "The mountain is visible from here.（从这里可以看见那座山。）", ["PETS3", "CET-4"], "B1", 2, [["vis", "root", "看"], ["-ible", "suffix", "可…的"]], ["高频"]],
         ["supervise", "/ˈsuːpərvaɪz/", "监督；管理；指导", "A manager was hired to supervise the project.（聘请了一位经理来监督项目。）", ["考研", "托福"], "C1", 4, [["super-", "prefix", "在上"], ["vis", "root", "看"]], ["真题"]],
         ["revise", "/rɪˈvaɪz/", "修订；复习", "You should revise your essay before submitting it.（提交前你应该修改文章。）", ["CET-4", "考研"], "B2", 3, [["re-", "prefix", "再次"], ["vis", "root", "看"]], ["高频"]],
-        ["television", "/ˈtelɪvɪʒn/", "电视；电视机", "They watched the news on television.（他们在电视上看了新闻。）", ["A级"], "A2", 1, [["tele", "root", "远"], ["vis", "root", "看"]], ["基础"]],
+        ["television", "/ˈtelɪvɪʒn/", "电视；电视机", "They watched the news on television.（他们在电视上看了新闻。）", ["PETS3"], "A2", 1, [["tele", "root", "远"], ["vis", "root", "看"]], ["基础"]],
         ["inject", "/ɪnˈdʒekt/", "注射；注入", "The nurse injected the vaccine into his arm.（护士把疫苗注射到他的手臂。）", ["考研", "雅思"], "C1", 3, [["in-", "prefix", "向内"], ["ject", "root", "投掷"]], ["真题"]],
-        ["reject", "/rɪˈdʒekt/", "拒绝；排斥", "The company rejected his application.（公司拒绝了他的申请。）", ["A级", "CET-4"], "B1", 2, [["re-", "prefix", "回"], ["ject", "root", "投掷"]], ["高频"]],
-        ["project", "/ˈprɑːdʒekt/", "项目；工程；投射", "The team completed the project on time.（团队按时完成了项目。）", ["A级"], "B1", 1, [["pro-", "prefix", "向前"], ["ject", "root", "投掷"]], ["基础"]],
-        ["object", "/ˈɑːbdʒekt/", "物体；目标；反对", "The bright object in the sky was a plane.（天空中的明亮物体是一架飞机。）", ["A级"], "A2", 1, [["ob-", "prefix", "朝向"], ["ject", "root", "投掷"]], ["基础"]],
+        ["reject", "/rɪˈdʒekt/", "拒绝；排斥", "The company rejected his application.（公司拒绝了他的申请。）", ["PETS3", "CET-4"], "B1", 2, [["re-", "prefix", "回"], ["ject", "root", "投掷"]], ["高频"]],
+        ["project", "/ˈprɑːdʒekt/", "项目；工程；投射", "The team completed the project on time.（团队按时完成了项目。）", ["PETS3"], "B1", 1, [["pro-", "prefix", "向前"], ["ject", "root", "投掷"]], ["基础"]],
+        ["object", "/ˈɑːbdʒekt/", "物体；目标；反对", "The bright object in the sky was a plane.（天空中的明亮物体是一架飞机。）", ["PETS3"], "A2", 1, [["ob-", "prefix", "朝向"], ["ject", "root", "投掷"]], ["基础"]],
         ["submit", "/səbˈmɪt/", "提交；服从", "Please submit your report by Friday.（请在周五前提交报告。）", ["CET-4", "考研"], "B2", 3, [["sub-", "prefix", "下面"], ["mit", "root", "送"]], ["真题"]],
         ["transmit", "/trænzˈmɪt/", "传输；传播", "The station transmits signals day and night.（这个电台日夜传输信号。）", ["考研", "托福"], "C1", 3, [["trans-", "prefix", "跨越"], ["mit", "root", "送"]], ["真题"]],
         ["dismiss", "/dɪsˈmɪs/", "解散；解雇；不予考虑", "Do not dismiss the idea too quickly.（不要太快否定这个想法。）", ["CET-4", "考研"], "B2", 3, [["dis-", "prefix", "分开"], ["miss", "root", "送"]], ["真题"]],
-        ["mission", "/ˈmɪʃn/", "任务；使命；使团", "Their mission is to protect the forest.（他们的使命是保护森林。）", ["A级", "CET-4"], "B1", 2, [["miss", "root", "送"], ["-ion", "suffix", "名词"]], ["高频"]],
-        ["permission", "/pərˈmɪʃn/", "许可；允许", "You need permission to enter the lab.（进入实验室需要许可。）", ["A级"], "B1", 2, [["per-", "prefix", "通过"], ["miss", "root", "送"]], ["基础"]],
-        ["inform", "/ɪnˈfɔːrm/", "通知；告知", "Please inform us of any changes.（如有任何变化请通知我们。）", ["A级"], "A2", 1, [["in-", "prefix", "向内"], ["form", "root", "形状"]], ["基础"]],
+        ["mission", "/ˈmɪʃn/", "任务；使命；使团", "Their mission is to protect the forest.（他们的使命是保护森林。）", ["PETS3", "CET-4"], "B1", 2, [["miss", "root", "送"], ["-ion", "suffix", "名词"]], ["高频"]],
+        ["permission", "/pərˈmɪʃn/", "许可；允许", "You need permission to enter the lab.（进入实验室需要许可。）", ["PETS3"], "B1", 2, [["per-", "prefix", "通过"], ["miss", "root", "送"]], ["基础"]],
+        ["inform", "/ɪnˈfɔːrm/", "通知；告知", "Please inform us of any changes.（如有任何变化请通知我们。）", ["PETS3"], "A2", 1, [["in-", "prefix", "向内"], ["form", "root", "形状"]], ["基础"]],
         ["reform", "/rɪˈfɔːrm/", "改革；改进", "The school plans to reform its teaching methods.（学校计划改革教学方法。）", ["CET-4", "考研"], "B2", 3, [["re-", "prefix", "再次"], ["form", "root", "形状"]], ["真题"]],
-        ["uniform", "/ˈjuːnɪfɔːrm/", "制服；统一的", "Students wear a blue uniform at school.（学生在学校穿蓝色制服。）", ["A级", "CET-4"], "B1", 2, [["uni-", "prefix", "一"], ["form", "root", "形状"]], ["高频"]],
-        ["describe", "/dɪˈskraɪb/", "描述；形容", "Can you describe the man you saw?（你能描述一下你看到的那个人吗？）", ["A级"], "A2", 1, [["de-", "prefix", "向下"], ["scrib", "root", "写"]], ["基础"]],
+        ["uniform", "/ˈjuːnɪfɔːrm/", "制服；统一的", "Students wear a blue uniform at school.（学生在学校穿蓝色制服。）", ["PETS3", "CET-4"], "B1", 2, [["uni-", "prefix", "一"], ["form", "root", "形状"]], ["高频"]],
+        ["describe", "/dɪˈskraɪb/", "描述；形容", "Can you describe the man you saw?（你能描述一下你看到的那个人吗？）", ["PETS3"], "A2", 1, [["de-", "prefix", "向下"], ["scrib", "root", "写"]], ["基础"]],
         ["subscribe", "/səbˈskraɪb/", "订阅；同意", "I subscribe to a weekly science magazine.（我订阅了一本周刊科学杂志。）", ["考研", "雅思"], "B2", 3, [["sub-", "prefix", "下面"], ["scrib", "root", "写"]], ["真题"]],
         ["manuscript", "/ˈmænjuskrɪpt/", "手稿；原稿", "The author sent the manuscript to the publisher.（作者把手稿寄给了出版社。）", ["雅思", "托福"], "C1", 4, [["manu", "root", "手"], ["script", "root", "写"]], ["高级"]],
-        ["interrupt", "/ˌɪntəˈrʌpt/", "打断；中断", "Please do not interrupt while others are speaking.（别人说话时请不要打断。）", ["A级", "CET-4"], "B1", 2, [["inter-", "prefix", "之间"], ["rupt", "root", "打破"]], ["高频"]],
+        ["interrupt", "/ˌɪntəˈrʌpt/", "打断；中断", "Please do not interrupt while others are speaking.（别人说话时请不要打断。）", ["PETS3", "CET-4"], "B1", 2, [["inter-", "prefix", "之间"], ["rupt", "root", "打破"]], ["高频"]],
         ["erupt", "/ɪˈrʌpt/", "爆发；喷发", "The volcano could erupt at any moment.（火山随时可能喷发。）", ["雅思", "托福"], "B2", 3, [["e-", "prefix", "向外"], ["rupt", "root", "打破"]], ["真题"]],
         ["corrupt", "/kəˈrʌpt/", "腐败的；使腐化", "The corrupt official was arrested.（那名腐败官员被逮捕了。）", ["考研", "雅思"], "C1", 3, [["cor-", "prefix", "完全"], ["rupt", "root", "打破"]], ["真题"]],
         ["conduct", "/kənˈdʌkt/", "进行；引导；行为", "The researchers conducted a survey.（研究人员进行了一项调查。）", ["CET-4", "考研"], "B2", 3, [["con-", "prefix", "共同"], ["duct", "root", "引导"]], ["真题"]],
-        ["introduce", "/ˌɪntrəˈduːs/", "介绍；引进", "Let me introduce my friend to you.（让我把朋友介绍给你。）", ["A级"], "A2", 1, [["intro-", "prefix", "向内"], ["duc", "root", "引导"]], ["基础"]],
-        ["reduce", "/rɪˈduːs/", "减少；降低", "We should reduce plastic waste.（我们应该减少塑料垃圾。）", ["A级"], "B1", 2, [["re-", "prefix", "回"], ["duc", "root", "引导"]], ["高频"]],
-        ["produce", "/prəˈduːs/", "生产；产生", "The factory produces electric cars.（这家工厂生产电动汽车。）", ["A级"], "A2", 1, [["pro-", "prefix", "向前"], ["duc", "root", "引导"]], ["基础"]],
+        ["introduce", "/ˌɪntrəˈduːs/", "介绍；引进", "Let me introduce my friend to you.（让我把朋友介绍给你。）", ["PETS3"], "A2", 1, [["intro-", "prefix", "向内"], ["duc", "root", "引导"]], ["基础"]],
+        ["reduce", "/rɪˈduːs/", "减少；降低", "We should reduce plastic waste.（我们应该减少塑料垃圾。）", ["PETS3"], "B1", 2, [["re-", "prefix", "回"], ["duc", "root", "引导"]], ["高频"]],
+        ["produce", "/prəˈduːs/", "生产；产生", "The factory produces electric cars.（这家工厂生产电动汽车。）", ["PETS3"], "A2", 1, [["pro-", "prefix", "向前"], ["duc", "root", "引导"]], ["基础"]],
         ["compel", "/kəmˈpel/", "强迫；迫使", "The evidence compelled him to confess.（证据迫使他认罪。）", ["考研", "托福"], "C1", 4, [["com-", "prefix", "共同"], ["pel", "root", "驱动"]], ["高级"]],
         ["expel", "/ɪkˈspel/", "驱逐；开除", "The student was expelled for cheating.（那名学生因作弊被开除。）", ["雅思", "托福"], "C1", 4, [["ex-", "prefix", "向外"], ["pel", "root", "驱动"]], ["高级"]],
         ["repel", "/rɪˈpel/", "击退；使厌恶", "The soldiers managed to repel the attack.（士兵们成功击退了进攻。）", ["托福"], "C1", 4, [["re-", "prefix", "回"], ["pel", "root", "驱动"]], ["高级"]],
         ["audible", "/ˈɔːdəbl/", "听得见的", "His voice was barely audible in the hall.（在大厅里他的声音几乎听不见。）", ["雅思", "托福"], "C1", 3, [["aud", "root", "听"], ["-ible", "suffix", "可…的"]], ["真题"]],
-        ["audience", "/ˈɔːdiəns/", "观众；听众；受众", "The audience applauded at the end.（结束时观众鼓掌。）", ["A级"], "B1", 1, [["aud", "root", "听"], ["-ence", "suffix", "名词"]], ["基础"]],
-        ["credit", "/ˈkredɪt/", "信用；学分；赞扬", "He bought the car on credit.（他赊购了这辆车。）", ["A级", "CET-4"], "B1", 2, [["cred", "root", "相信"]], ["高频"]],
-        ["incredible", "/ɪnˈkredəbl/", "难以置信的", "The view from the top was incredible.（山顶的景色令人难以置信。）", ["A级", "CET-4"], "B1", 2, [["in-", "prefix", "不"], ["cred", "root", "相信"], ["-ible", "suffix", "可…的"]], ["高频"]],
-        ["factory", "/ˈfæktəri/", "工厂", "The factory employs five hundred workers.（这家工厂雇用了五百名工人。）", ["A级"], "A2", 1, [["fact", "root", "做"], ["-ory", "suffix", "场所"]], ["基础"]],
+        ["audience", "/ˈɔːdiəns/", "观众；听众；受众", "The audience applauded at the end.（结束时观众鼓掌。）", ["PETS3"], "B1", 1, [["aud", "root", "听"], ["-ence", "suffix", "名词"]], ["基础"]],
+        ["credit", "/ˈkredɪt/", "信用；学分；赞扬", "He bought the car on credit.（他赊购了这辆车。）", ["PETS3", "CET-4"], "B1", 2, [["cred", "root", "相信"]], ["高频"]],
+        ["incredible", "/ɪnˈkredəbl/", "难以置信的", "The view from the top was incredible.（山顶的景色令人难以置信。）", ["PETS3", "CET-4"], "B1", 2, [["in-", "prefix", "不"], ["cred", "root", "相信"], ["-ible", "suffix", "可…的"]], ["高频"]],
+        ["factory", "/ˈfæktəri/", "工厂", "The factory employs five hundred workers.（这家工厂雇用了五百名工人。）", ["PETS3"], "A2", 1, [["fact", "root", "做"], ["-ory", "suffix", "场所"]], ["基础"]],
         ["manufacture", "/ˌmænjuˈfæktʃər/", "制造；制造业", "The company manufactures medical equipment.（这家公司制造医疗设备。）", ["考研", "托福"], "B2", 3, [["manu", "root", "手"], ["fact", "root", "做"]], ["真题"]],
-        ["affect", "/əˈfekt/", "影响；感动", "Weather can affect our mood.（天气会影响我们的情绪。）", ["A级"], "B1", 2, [["af-", "prefix", "朝向"], ["fect", "root", "做"]], ["高频"]],
-        ["effect", "/ɪˈfekt/", "效果；影响", "The new policy had a positive effect.（新政策产生了积极效果。）", ["A级"], "B1", 2, [["ef-", "prefix", "向外"], ["fect", "root", "做"]], ["高频"]],
+        ["affect", "/əˈfekt/", "影响；感动", "Weather can affect our mood.（天气会影响我们的情绪。）", ["PETS3"], "B1", 2, [["af-", "prefix", "朝向"], ["fect", "root", "做"]], ["高频"]],
+        ["effect", "/ɪˈfekt/", "效果；影响", "The new policy had a positive effect.（新政策产生了积极效果。）", ["PETS3"], "B1", 2, [["ef-", "prefix", "向外"], ["fect", "root", "做"]], ["高频"]],
         ["infinite", "/ˈɪnfɪnət/", "无限的；无穷的", "The universe seems almost infinite.（宇宙似乎几乎是无限的。）", ["考研", "雅思"], "B2", 3, [["in-", "prefix", "不"], ["fin", "root", "结束"]], ["真题"]],
-        ["define", "/dɪˈfaɪn/", "定义；阐明", "Please define the key terms clearly.（请清楚定义这些关键术语。）", ["A级", "CET-4"], "B1", 2, [["de-", "prefix", "完全"], ["fin", "root", "结束"]], ["高频"]],
-        ["final", "/ˈfaɪnl/", "最终的；决赛", "This is my final decision.（这是我的最终决定。）", ["A级"], "A2", 1, [["fin", "root", "结束"], ["-al", "suffix", "形容词"]], ["基础"]],
+        ["define", "/dɪˈfaɪn/", "定义；阐明", "Please define the key terms clearly.（请清楚定义这些关键术语。）", ["PETS3", "CET-4"], "B1", 2, [["de-", "prefix", "完全"], ["fin", "root", "结束"]], ["高频"]],
+        ["final", "/ˈfaɪnl/", "最终的；决赛", "This is my final decision.（这是我的最终决定。）", ["PETS3"], "A2", 1, [["fin", "root", "结束"], ["-al", "suffix", "形容词"]], ["基础"]],
         ["generate", "/ˈdʒenəreɪt/", "产生；生成", "Solar panels generate electricity.（太阳能板发电。）", ["CET-4", "考研"], "B2", 3, [["gen", "root", "产生"], ["-ate", "suffix", "动词"]], ["真题"]],
         ["genius", "/ˈdʒiːniəs/", "天才；天赋", "She showed a genius for music at an early age.（她小时候就表现出音乐天赋。）", ["雅思", "托福"], "B2", 3, [["gen", "root", "产生"], ["-ius", "suffix", "名词"]], ["真题"]],
-        ["progress", "/ˈprɑːɡres/", "进步；进展", "He has made great progress in English.（他的英语进步很大。）", ["A级"], "A2", 1, [["pro-", "prefix", "向前"], ["gress", "root", "行走"]], ["基础"]],
-        ["graduate", "/ˈɡrædʒueɪt/", "毕业；毕业生", "She will graduate from college next year.（她明年大学毕业。）", ["A级"], "B1", 1, [["grad", "root", "步"], ["-uate", "suffix", "动词"]], ["基础"]],
+        ["progress", "/ˈprɑːɡres/", "进步；进展", "He has made great progress in English.（他的英语进步很大。）", ["PETS3"], "A2", 1, [["pro-", "prefix", "向前"], ["gress", "root", "行走"]], ["基础"]],
+        ["graduate", "/ˈɡrædʒueɪt/", "毕业；毕业生", "She will graduate from college next year.（她明年大学毕业。）", ["PETS3"], "B1", 1, [["grad", "root", "步"], ["-uate", "suffix", "动词"]], ["基础"]],
         ["autograph", "/ˈɔːtəɡræf/", "亲笔签名", "The singer gave the fan an autograph.（歌手给粉丝签了名。）", ["雅思", "托福"], "C1", 4, [["auto", "root", "自己"], ["graph", "root", "写"]], ["高级"]],
-        ["geography", "/dʒiˈɑːɡrəfi/", "地理；地理学", "Geography helps us understand the world.（地理帮助我们理解世界。）", ["A级"], "B1", 2, [["geo", "root", "地球"], ["graph", "root", "写"]], ["基础"]],
-        ["biology", "/baɪˈɑːlədʒi/", "生物学", "Biology is the study of living things.（生物学是研究生物的科学。）", ["A级"], "B1", 2, [["bio", "root", "生命"], ["log", "root", "学科"]], ["基础"]],
-        ["dialogue", "/ˈdaɪəlɔːɡ/", "对话；对白", "The film has clever and natural dialogue.（这部电影的对白巧妙自然。）", ["A级"], "B1", 2, [["dia-", "prefix", "之间"], ["log", "root", "说话"]], ["高频"]],
+        ["geography", "/dʒiˈɑːɡrəfi/", "地理；地理学", "Geography helps us understand the world.（地理帮助我们理解世界。）", ["PETS3"], "B1", 2, [["geo", "root", "地球"], ["graph", "root", "写"]], ["基础"]],
+        ["biology", "/baɪˈɑːlədʒi/", "生物学", "Biology is the study of living things.（生物学是研究生物的科学。）", ["PETS3"], "B1", 2, [["bio", "root", "生命"], ["log", "root", "学科"]], ["基础"]],
+        ["dialogue", "/ˈdaɪəlɔːɡ/", "对话；对白", "The film has clever and natural dialogue.（这部电影的对白巧妙自然。）", ["PETS3"], "B1", 2, [["dia-", "prefix", "之间"], ["log", "root", "说话"]], ["高频"]],
         ["manual", "/ˈmænjuəl/", "手册；手工的；体力的", "Read the manual before using the machine.（使用机器前请阅读手册。）", ["CET-4", "考研"], "B2", 3, [["manu", "root", "手"], ["-al", "suffix", "形容词"]], ["真题"]],
-        ["motion", "/ˈmoʊʃn/", "运动；动作；提议", "The motion of the waves was calming.（海浪的运动让人平静。）", ["A级", "CET-4"], "B1", 2, [["mot", "root", "移动"], ["-ion", "suffix", "名词"]], ["高频"]],
-        ["emotion", "/ɪˈmoʊʃn/", "情感；情绪", "Music can express deep emotion.（音乐能表达深沉的情感。）", ["A级", "CET-4"], "B1", 2, [["e-", "prefix", "向外"], ["mot", "root", "移动"]], ["高频"]],
+        ["motion", "/ˈmoʊʃn/", "运动；动作；提议", "The motion of the waves was calming.（海浪的运动让人平静。）", ["PETS3", "CET-4"], "B1", 2, [["mot", "root", "移动"], ["-ion", "suffix", "名词"]], ["高频"]],
+        ["emotion", "/ɪˈmoʊʃn/", "情感；情绪", "Music can express deep emotion.（音乐能表达深沉的情感。）", ["PETS3", "CET-4"], "B1", 2, [["e-", "prefix", "向外"], ["mot", "root", "移动"]], ["高频"]],
         ["promote", "/prəˈmoʊt/", "促进；晋升；推广", "The campaign aims to promote healthy eating.（该活动旨在促进健康饮食。）", ["CET-4", "考研"], "B2", 3, [["pro-", "prefix", "向前"], ["mot", "root", "移动"]], ["真题"]],
-        ["remove", "/rɪˈmuːv/", "移除；脱掉", "Please remove your shoes before entering.（进门请脱鞋。）", ["A级"], "A2", 1, [["re-", "prefix", "回"], ["mov", "root", "移动"]], ["基础"]],
+        ["remove", "/rɪˈmuːv/", "移除；脱掉", "Please remove your shoes before entering.（进门请脱鞋。）", ["PETS3"], "A2", 1, [["re-", "prefix", "回"], ["mov", "root", "移动"]], ["基础"]],
         ["sympathy", "/ˈsɪmpəθi/", "同情；赞同", "She expressed sympathy for the victims.（她对受害者表示同情。）", ["考研", "雅思"], "B2", 3, [["sym-", "prefix", "共同"], ["path", "root", "感受"]], ["真题"]],
-        ["apology", "/əˈpɑːlədʒi/", "道歉", "He made an apology for being late.（他为迟到道了歉。）", ["A级"], "B1", 2, [["apo-", "prefix", "离开"], ["log", "root", "说话"]], ["高频"]],
+        ["apology", "/əˈpɑːlədʒi/", "道歉", "He made an apology for being late.（他为迟到道了歉。）", ["PETS3"], "B1", 2, [["apo-", "prefix", "离开"], ["log", "root", "说话"]], ["高频"]],
         ["compose", "/kəmˈpoʊz/", "组成；创作；使平静", "Water is composed of hydrogen and oxygen.（水由氢和氧组成。）", ["考研", "托福"], "B2", 3, [["com-", "prefix", "共同"], ["pos", "root", "放置"]], ["真题"]],
         ["expose", "/ɪkˈspoʊz/", "暴露；揭露；使接触", "Do not expose your skin to strong sunlight.（不要让你的皮肤暴露在强烈阳光下。）", ["考研", "雅思"], "B2", 3, [["ex-", "prefix", "向外"], ["pos", "root", "放置"]], ["真题"]],
         ["deposit", "/dɪˈpɑːzɪt/", "存款；存放；押金", "She made a deposit at the bank.（她在银行存了款。）", ["雅思", "托福"], "B2", 3, [["de-", "prefix", "向下"], ["pos", "root", "放置"]], ["真题"]],
         ["sequence", "/ˈsiːkwəns/", "顺序；序列", "Arrange the numbers in sequence.（按顺序排列这些数字。）", ["考研", "托福"], "B2", 3, [["sequ", "root", "跟随"], ["-ence", "suffix", "名词"]], ["真题"]],
         ["consequence", "/ˈkɑːnsəkwens/", "后果；结果", "Every action has a consequence.（每个行动都有后果。）", ["CET-4", "考研"], "B2", 3, [["con-", "prefix", "共同"], ["sequ", "root", "跟随"]], ["真题"]],
-        ["solve", "/sɑːlv/", "解决；解答", "We need to solve this problem together.（我们需要一起解决这个问题。）", ["A级"], "A2", 1, [["solv", "root", "松开"]], ["基础"]],
+        ["solve", "/sɑːlv/", "解决；解答", "We need to solve this problem together.（我们需要一起解决这个问题。）", ["PETS3"], "A2", 1, [["solv", "root", "松开"]], ["基础"]],
         ["resolve", "/rɪˈzɑːlv/", "解决；决心", "They met to resolve the dispute.（他们开会解决争端。）", ["考研", "托福"], "B2", 3, [["re-", "prefix", "再次"], ["solv", "root", "松开"]], ["真题"]],
         ["extend", "/ɪkˈstend/", "延伸；扩大；提供", "The company plans to extend its market.（公司计划扩大市场。）", ["CET-4", "考研"], "B2", 3, [["ex-", "prefix", "向外"], ["tend", "root", "伸展"]], ["真题"]],
-        ["attend", "/əˈtend/", "出席；参加；照料", "More than one hundred people attended the meeting.（一百多人参加了会议。）", ["A级"], "A2", 1, [["at-", "prefix", "朝向"], ["tend", "root", "伸展"]], ["基础"]],
+        ["attend", "/əˈtend/", "出席；参加；照料", "More than one hundred people attended the meeting.（一百多人参加了会议。）", ["PETS3"], "A2", 1, [["at-", "prefix", "朝向"], ["tend", "root", "伸展"]], ["基础"]],
         ["reverse", "/rɪˈvɜːrs/", "逆转；相反的；倒车", "The court reversed the earlier decision.（法院推翻了先前的判决。）", ["考研", "托福"], "C1", 3, [["re-", "prefix", "回"], ["vers", "root", "转"]], ["真题"]],
         ["convert", "/kənˈvɜːrt/", "转换；转变；皈依", "The old factory was converted into a museum.（旧工厂被改造成了博物馆。）", ["考研", "托福"], "B2", 3, [["con-", "prefix", "共同"], ["vert", "root", "转"]], ["真题"]],
         ["vocal", "/ˈvoʊkl/", "嗓音的；直言不讳的", "She has been vocal about environmental issues.（她一直直言环境问题。）", ["雅思", "托福"], "C1", 3, [["voc", "root", "叫"], ["-al", "suffix", "形容词"]], ["真题"]],
         ["advocate", "/ˈædvəkeɪt/", "提倡；拥护者", "Many experts advocate a balanced diet.（许多专家提倡均衡饮食。）", ["考研", "托福"], "C1", 4, [["ad-", "prefix", "朝向"], ["voc", "root", "叫"]], ["真题"]],
         ["evolve", "/ɪˈvɑːlv/", "进化；逐步发展", "Species evolve over millions of years.（物种经过数百万年进化。）", ["考研", "雅思"], "C1", 3, [["e-", "prefix", "向外"], ["volv", "root", "滚"]], ["真题"]],
-        ["involve", "/ɪnˈvɑːlv/", "涉及；包含；使参与", "The project will involve many volunteers.（这个项目会涉及许多志愿者。）", ["A级", "CET-4"], "B1", 2, [["in-", "prefix", "向内"], ["volv", "root", "滚"]], ["高频"]],
-        ["benefit", "/ˈbenɪfɪt/", "好处；受益", "Regular exercise has many benefits.（经常锻炼有很多好处。）", ["A级"], "B1", 1, [["bene", "root", "好"], ["fit", "root", "做"]], ["基础"]],
-        ["automatic", "/ˌɔːtəˈmætɪk/", "自动的；无意识的", "The door has an automatic lock.（这扇门有自动锁。）", ["A级", "CET-4"], "B1", 2, [["auto", "root", "自己"], ["-matic", "suffix", "形容词"]], ["高频"]],
-        ["telephone", "/ˈtelɪfoʊn/", "电话；打电话", "The telephone rang but nobody answered.（电话响了但没人接。）", ["A级"], "A2", 1, [["tele", "root", "远"], ["phone", "root", "声音"]], ["基础"]],
+        ["involve", "/ɪnˈvɑːlv/", "涉及；包含；使参与", "The project will involve many volunteers.（这个项目会涉及许多志愿者。）", ["PETS3", "CET-4"], "B1", 2, [["in-", "prefix", "向内"], ["volv", "root", "滚"]], ["高频"]],
+        ["benefit", "/ˈbenɪfɪt/", "好处；受益", "Regular exercise has many benefits.（经常锻炼有很多好处。）", ["PETS3"], "B1", 1, [["bene", "root", "好"], ["fit", "root", "做"]], ["基础"]],
+        ["automatic", "/ˌɔːtəˈmætɪk/", "自动的；无意识的", "The door has an automatic lock.（这扇门有自动锁。）", ["PETS3", "CET-4"], "B1", 2, [["auto", "root", "自己"], ["-matic", "suffix", "形容词"]], ["高频"]],
+        ["telephone", "/ˈtelɪfoʊn/", "电话；打电话", "The telephone rang but nobody answered.（电话响了但没人接。）", ["PETS3"], "A2", 1, [["tele", "root", "远"], ["phone", "root", "声音"]], ["基础"]],
         ["microscope", "/ˈmaɪkrəskoʊp/", "显微镜", "Bacteria can be seen under a microscope.（细菌可以在显微镜下看到。）", ["雅思", "托福"], "B2", 3, [["micro", "root", "小"], ["scope", "root", "看"]], ["真题"]],
         ["chronic", "/ˈkrɑːnɪk/", "慢性的；长期的", "He suffers from chronic back pain.（他患有慢性背痛。）", ["雅思", "托福"], "C1", 4, [["chron", "root", "时间"], ["-ic", "suffix", "形容词"]], ["高级"]],
         ["anthropology", "/ˌænθrəˈpɑːlədʒi/", "人类学", "She studies anthropology at university.（她在大学学习人类学。）", ["雅思", "托福"], "C1", 5, [["anthrop", "root", "人类"], ["log", "root", "学科"]], ["高级"]],
@@ -2444,7 +2444,7 @@
       };
 
       const defaultState = {
-        currentExam: "A级",
+        currentExam: "PETS3",
         mode: "gallery",
         theme: "light",
         viewMode: "auto",
@@ -4057,7 +4057,7 @@
             '<h2 class="assessment-title">你觉得自己目前的词汇水平更接近哪个？</h2>' +
             '<p class="assessment-sub">按直觉选择即可，后面的小测试会进一步校准。</p>' +
             '<div class="assessment-options" id="assessmentLevelOptions">' +
-            [{ level: "A1", label: "零基础 / 小学", desc: "刚开始学，约 600-1000 词" }, { level: "A2", label: "A级基础", desc: "约 2000-3000 词，能应对基础日常表达" }, { level: "B1", label: "四级水平", desc: "约 3500-4500 词，能阅读一般文章" }, { level: "B2", label: "考研 / 雅思", desc: "约 5500-7000 词，能处理学术材料" }, { level: "C1", label: "托福 / 高级", desc: "约 8000 词以上，能处理复杂内容" }, { level: "C2", label: "接近母语", desc: "词汇量很大，主要提升表达精度和语感" }, { level: "unknown", label: "我不确定", desc: "让后面的快速测试帮助判断" }].map(function (item) {
+            [{ level: "A1", label: "零基础 / 小学", desc: "刚开始学，约 600-1000 词" }, { level: "A2", label: "PETS3 / 公共英语三级", desc: "约 4000 词，能应对基础日常表达和常见应用文" }, { level: "B1", label: "四级水平", desc: "约 3500-4500 词，能阅读一般文章" }, { level: "B2", label: "考研 / 雅思", desc: "约 5500-7000 词，能处理学术材料" }, { level: "C1", label: "托福 / 高级", desc: "约 8000 词以上，能处理复杂内容" }, { level: "C2", label: "接近母语", desc: "词汇量很大，主要提升表达精度和语感" }, { level: "unknown", label: "我不确定", desc: "让后面的快速测试帮助判断" }].map(function (item) {
               return '<button class="assessment-option" data-level="' + item.level + '"><strong>' + item.label + '</strong><br><span style="color:var(--muted);font-size:12px">' + item.desc + '</span></button>';
             }).join("") +
             '</div>' +
@@ -4118,7 +4118,7 @@
           "小学": "小学基础词汇",
           "初中": "初中核心词汇",
           "高中": "高中核心词汇",
-          "A级": "高职高专应用能力考试",
+          "PETS3": "全国英语等级考试第三级",
           "CET-4": "大学英语四级",
           "CET-6": "大学英语六级",
           "考研": "考研英语一/二",
@@ -4248,7 +4248,7 @@
       function getAssessmentWordPool(level) {
         const examMap = {
           A1: ["小学"],
-          A2: ["小学", "A级"],
+          A2: ["小学", "PETS3"],
           B1: ["初中", "高中", "CET-4"],
           B2: ["高中", "CET-6", "考研", "雅思"],
           C1: ["CET-6", "雅思", "托福"],
@@ -5209,7 +5209,7 @@
       function requestAIExplanation(word, provider, key) {
         const exam = state.currentExam;
         const contextMap = {
-          "A级": "你是高校英语应用能力考试 A 级资深教师。请用词根词源法拆解该词，并给出 3 个 A 级常考同根词、中文释义和例句。",
+          "PETS3": "你是全国英语等级考试三级资深教师。请用词根词源法拆解该词，重点说明它在 PETS3 听力、阅读、写作和应用文中的常考义项，并给出 3 个三级常考同根词、中文释义和例句。",
           "CET-4": "你是大学英语四级名师。请用词根词源法拆解该词，突出四级阅读与听力中的常考义项，并给出 3 个同根词和例句。",
           "考研": "你是考研英语名师。请用词根词源法拆解该词，重点说明它在考研英语一/二完形填空和阅读中的高频考察方向，并给出 3 个同根词和例句。",
           "雅思": "你是雅思 8.5 分名师。请用词根词源法拆解该词，重点说明它在雅思听力/阅读中的常考同义替换词和剑桥真题常见搭配，并给出 3 个同根词和例句。",
