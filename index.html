@@ -1563,6 +1563,50 @@
       transform: translate(-50%, 0);
     }
 
+    .ai-alert-banner {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      z-index: 4100;
+      width: min(430px, calc(100% - 32px));
+      padding: 15px 16px;
+      border: 1px solid #e4b65a;
+      border-left: 5px solid var(--amber);
+      border-radius: 8px;
+      color: var(--ink);
+      background: #fff8e8;
+      box-shadow: 0 18px 48px rgba(12, 20, 35, 0.24);
+    }
+
+    .ai-alert-banner.critical {
+      border-color: #e8a2a2;
+      border-left-color: var(--red);
+      background: #fff1f1;
+    }
+
+    .ai-alert-banner strong {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+    }
+
+    .ai-alert-banner p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .ai-alert-banner button {
+      margin-top: 10px;
+      padding: 7px 10px;
+      border: 0;
+      border-radius: 6px;
+      color: #fff;
+      background: var(--blue);
+      cursor: pointer;
+    }
+
     .empty-state {
       width: min(760px, 100%);
       margin: 0 auto;
@@ -3032,7 +3076,19 @@
           trainingWordCount: 30,
           showCrossover: false,
           autoSpeak: false,
-          autoReview: true
+          autoReview: true,
+          siteOnlyKeyConfirmed: false,
+          publicDeviceMode: false,
+          aiDailyBudgetYuan: 5,
+          aiInputPriceYuanPerMillion: 2,
+          aiOutputPriceYuanPerMillion: 8,
+          aiSingleCallAlertYuan: 0.2,
+          aiHourlyCallLimit: 20
+        },
+        aiUsage: {
+          daily: {},
+          events: [],
+          lastAlert: null
         }
       };
 
@@ -3081,6 +3137,10 @@
         merged.settings = Object.assign({}, defaultState.settings, saved.settings || {});
         merged.personal = Object.assign({}, defaultState.personal, saved.personal || {});
         merged.personal.daily = Object.assign({}, defaultState.personal.daily, (saved.personal && saved.personal.daily) || {});
+        merged.aiUsage = Object.assign({}, defaultState.aiUsage, saved.aiUsage || {});
+        merged.aiUsage.daily = Object.assign({}, defaultState.aiUsage.daily, (saved.aiUsage && saved.aiUsage.daily) || {});
+        merged.aiUsage.events = Array.isArray(merged.aiUsage.events) ? merged.aiUsage.events : [];
+        merged.aiUsage.lastAlert = merged.aiUsage.lastAlert || null;
         merged.progress = merged.progress || {};
         merged.customWords = Array.isArray(merged.customWords) ? merged.customWords : [];
         merged.assessment = saved.assessment || null;
@@ -3097,7 +3157,11 @@
 
       function persist() {
         try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          const snapshot = JSON.parse(JSON.stringify(state));
+          if (snapshot.settings && snapshot.settings.publicDeviceMode) {
+            snapshot.settings.apiKey = "";
+          }
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
         } catch (error) {
           showToast("本地保存失败，请检查浏览器存储权限");
         }
@@ -5610,6 +5674,9 @@
         const diagnostics = buildDiagnostics(exam);
         const provider = state.settings.apiProvider;
         const key = state.settings.apiKey.trim();
+        if (!assertAIRequestAllowed()) {
+          return Promise.reject(new Error("AI 调用已被本地安全规则暂停"));
+        }
         const endpoint = provider === "openai"
           ? "https://api.openai.com/v1/chat/completions"
           : "https://api.deepseek.com/chat/completions";
@@ -5647,6 +5714,7 @@
           }
           return response.json();
         }).then(function (data) {
+          recordAIUsage(provider, model, data, "teacher-plan");
           const raw = data && data.choices && data.choices[0] && data.choices[0].message
             ? data.choices[0].message.content
             : "";
@@ -5784,6 +5852,9 @@
 
       function requestAIExplanation(word, provider, key) {
         const exam = state.currentExam;
+        if (!assertAIRequestAllowed()) {
+          return Promise.reject(new Error("AI 调用已被本地安全规则暂停"));
+        }
         const contextMap = {
           "PETS3": "你是全国英语等级考试三级资深教师。请用词根词源法拆解该词，重点说明它在 PETS3 听力、阅读、写作和应用文中的常考义项，并给出 3 个三级常考同根词、中文释义和例句。",
           "CET-4": "你是大学英语四级名师。请用词根词源法拆解该词，突出四级阅读与听力中的常考义项，并给出 3 个同根词和例句。",
@@ -5820,6 +5891,7 @@
           }
           return response.json();
         }).then(function (data) {
+          recordAIUsage(provider, model, data, "word:" + word.word);
           const raw = data && data.choices && data.choices[0] && data.choices[0].message
             ? data.choices[0].message.content
             : "";
@@ -5854,12 +5926,22 @@
 
       function openSettingsModal() {
         const modal = document.getElementById("modal");
+        const aiUsage = ensureAIUsageDay();
         modal.innerHTML = '<div class="modal-head">' +
           "<div><h2 class=\"modal-title\">设置</h2><div class=\"modal-sub\">本地保存你的学习偏好与 AI Key</div></div>" +
           '<button class="close-btn" data-action="closeModal" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>' +
           "</div>" +
           '<div class="field"><label>AI 服务商</label><select id="apiProvider"><option value="deepseek"' + (state.settings.apiProvider === "deepseek" ? " selected" : "") + '>DeepSeek</option><option value="openai"' + (state.settings.apiProvider === "openai" ? " selected" : "") + ">OpenAI</option></select></div>" +
           '<div class="field"><label>API Key</label><input id="apiKey" type="password" value="' + escapeAttr(state.settings.apiKey || "") + '" placeholder="sk-..." /></div>' +
+          '<div class="field"><label class="switch"><input type="checkbox" id="siteOnlyKeySetting"' + (state.settings.siteOnlyKeyConfirmed ? " checked" : "") + ' /> 我确认这把 Key 仅用于本网站，不与其他网站共用</label></div>' +
+          '<div class="file-format">请为本站单独创建一把 DeepSeek Key，避免和其他网站、脚本或项目共用。</div>' +
+          '<div class="field"><label class="switch"><input type="checkbox" id="publicDeviceSetting"' + (state.settings.publicDeviceMode ? " checked" : "") + ' /> 公共电脑模式：不把 API Key 保存到 localStorage</label></div>' +
+          '<div class="field-row"><div class="field"><label>每日预算（元）</label><input id="aiDailyBudget" type="number" min="0.01" step="0.01" value="' + Number(state.settings.aiDailyBudgetYuan || 5) + '" /></div>' +
+          '<div class="field"><label>单次异常阈值（元）</label><input id="aiSingleCallAlert" type="number" min="0" step="0.01" value="' + Number(state.settings.aiSingleCallAlertYuan || 0.2) + '" /></div></div>' +
+          '<div class="field-row"><div class="field"><label>输入价格（元/百万 token）</label><input id="aiInputPrice" type="number" min="0" step="0.01" value="' + Number(state.settings.aiInputPriceYuanPerMillion || 2) + '" /></div>' +
+          '<div class="field"><label>输出价格（元/百万 token）</label><input id="aiOutputPrice" type="number" min="0" step="0.01" value="' + Number(state.settings.aiOutputPriceYuanPerMillion || 8) + '" /></div></div>' +
+          '<div class="field"><label>每小时最多调用次数</label><input id="aiHourlyCallLimit" type="number" min="1" max="1000" value="' + Number(state.settings.aiHourlyCallLimit || 20) + '" /></div>' +
+          '<div class="file-format">今日估算：' + aiUsage.calls + ' 次调用 · ' + aiUsage.promptTokens + ' 输入 token · ' + aiUsage.completionTokens + ' 输出 token · 约 ' + Number(aiUsage.cost || 0).toFixed(3) + ' 元。真实余额上限仍以 DeepSeek 账户设置为准。</div>' +
           '<div class="field-row"><div class="field"><label>每日目标</label><input id="dailyGoal" type="number" min="5" max="200" value="' + Number(state.settings.dailyGoal || 30) + '" /></div>' +
           '<div class="field"><label>专属训练词数</label><input id="trainingWordCount" type="number" min="5" max="200" value="' + Number(state.settings.trainingWordCount || 30) + '" /></div></div>' +
           '<div class="field"><label>复习提醒</label><select id="notifications"><option value="0"' + (state.settings.notifications ? "" : " selected") + '>关闭</option><option value="1"' + (state.settings.notifications ? " selected" : "") + '>开启</option></select></div></div>' +
@@ -5889,6 +5971,13 @@
       function saveSettings() {
         const provider = document.getElementById("apiProvider").value;
         const key = document.getElementById("apiKey").value.trim();
+        const siteOnlyKeyConfirmed = document.getElementById("siteOnlyKeySetting").checked;
+        const publicDeviceMode = document.getElementById("publicDeviceSetting").checked;
+        const aiDailyBudgetYuan = Number(document.getElementById("aiDailyBudget").value) || 5;
+        const aiInputPriceYuanPerMillion = Number(document.getElementById("aiInputPrice").value) || 2;
+        const aiOutputPriceYuanPerMillion = Number(document.getElementById("aiOutputPrice").value) || 8;
+        const aiSingleCallAlertYuan = Number(document.getElementById("aiSingleCallAlert").value) || 0;
+        const aiHourlyCallLimit = Number(document.getElementById("aiHourlyCallLimit").value) || 20;
         const goal = Number(document.getElementById("dailyGoal").value) || 30;
         const trainingWordCount = Number(document.getElementById("trainingWordCount").value) || 30;
         const notifications = document.getElementById("notifications").value === "1";
@@ -5898,6 +5987,13 @@
         const viewMode = document.getElementById("viewModeSetting").value;
         state.settings.apiProvider = provider;
         state.settings.apiKey = key;
+        state.settings.siteOnlyKeyConfirmed = siteOnlyKeyConfirmed;
+        state.settings.publicDeviceMode = publicDeviceMode;
+        state.settings.aiDailyBudgetYuan = Math.max(0.01, Math.min(10000, aiDailyBudgetYuan));
+        state.settings.aiInputPriceYuanPerMillion = Math.max(0, Math.min(10000, aiInputPriceYuanPerMillion));
+        state.settings.aiOutputPriceYuanPerMillion = Math.max(0, Math.min(10000, aiOutputPriceYuanPerMillion));
+        state.settings.aiSingleCallAlertYuan = Math.max(0, Math.min(10000, aiSingleCallAlertYuan));
+        state.settings.aiHourlyCallLimit = Math.max(1, Math.min(1000, Math.round(aiHourlyCallLimit)));
         state.settings.dailyGoal = Math.min(200, Math.max(5, goal));
         state.settings.trainingWordCount = Math.min(200, Math.max(5, trainingWordCount));
         state.settings.notifications = notifications;
@@ -6397,6 +6493,229 @@
         toast.hideTimer = window.setTimeout(function () {
           toast.classList.remove("show");
         }, 2200);
+      }
+
+      function ensureAIUsageDay() {
+        const key = personalDateKey();
+        if (!state.aiUsage.daily[key]) {
+          state.aiUsage.daily[key] = {
+            calls: 0,
+            promptTokens: 0,
+            completionTokens: 0,
+            cost: 0
+          };
+        }
+        const day = state.aiUsage.daily[key];
+        ["calls", "promptTokens", "completionTokens", "cost"].forEach(function (field) {
+          if (typeof day[field] !== "number") {
+            day[field] = 0;
+          }
+        });
+        return day;
+      }
+
+      function calculateAICost(promptTokens, completionTokens) {
+        const inputPrice = Math.max(0, Number(state.settings.aiInputPriceYuanPerMillion) || 0);
+        const outputPrice = Math.max(0, Number(state.settings.aiOutputPriceYuanPerMillion) || 0);
+        return (promptTokens / 1000000) * inputPrice + (completionTokens / 1000000) * outputPrice;
+      }
+
+      function recentAIEvents(windowMs) {
+        const since = Date.now() - windowMs;
+        return (state.aiUsage.events || []).filter(function (event) {
+          return Number(event.time) >= since;
+        });
+      }
+
+      function showAIAlertBanner(alert) {
+        if (!alert || !document.body) {
+          return;
+        }
+        const previous = document.getElementById("aiAlertBanner");
+        if (previous) {
+          previous.remove();
+        }
+        const banner = document.createElement("div");
+        banner.id = "aiAlertBanner";
+        banner.className = "ai-alert-banner" + (alert.severity === "critical" ? " critical" : "");
+        const title = document.createElement("strong");
+        title.textContent = alert.severity === "critical" ? "AI 密钥消费警告" : "AI 密钥消费提醒";
+        const message = document.createElement("p");
+        message.textContent = alert.message;
+        const dismiss = document.createElement("button");
+        dismiss.type = "button";
+        dismiss.textContent = "我知道了";
+        dismiss.addEventListener("click", function () {
+          if (state.aiUsage.lastAlert && state.aiUsage.lastAlert.id === alert.id) {
+            state.aiUsage.lastAlert.dismissed = true;
+          }
+          persist();
+          banner.remove();
+        });
+        banner.appendChild(title);
+        banner.appendChild(message);
+        banner.appendChild(dismiss);
+        document.body.appendChild(banner);
+      }
+
+      function saveAIAlert(type, severity, message, fingerprint) {
+        const last = state.aiUsage.lastAlert;
+        if (
+          last &&
+          last.fingerprint === fingerprint &&
+          Date.now() - Number(last.time || 0) < 10 * 60 * 1000
+        ) {
+          return;
+        }
+        const alert = {
+          id: uid("ai-alert"),
+          type: type,
+          severity: severity,
+          message: message,
+          fingerprint: fingerprint,
+          time: Date.now(),
+          dismissed: false
+        };
+        state.aiUsage.lastAlert = alert;
+        persist();
+        showAIAlertBanner(alert);
+      }
+
+      function restoreAIAlertBanner() {
+        const alert = state.aiUsage.lastAlert;
+        if (!alert || alert.dismissed || Date.now() - Number(alert.time || 0) > 24 * 60 * 60 * 1000) {
+          return;
+        }
+        showAIAlertBanner(alert);
+      }
+
+      function assertAIRequestAllowed() {
+        const key = state.settings.apiKey && state.settings.apiKey.trim();
+        if (!key) {
+          return false;
+        }
+        if (!state.settings.siteOnlyKeyConfirmed) {
+          saveAIAlert(
+            "site_key_unconfirmed",
+            "critical",
+            "为了安全，请在设置中确认这把 DeepSeek Key 仅用于本站，否则网站不会调用它。",
+            "site-key-unconfirmed"
+          );
+          return false;
+        }
+        const day = ensureAIUsageDay();
+        const budget = Math.max(0.01, Number(state.settings.aiDailyBudgetYuan) || 0);
+        if (day.cost >= budget) {
+          saveAIAlert(
+            "daily_budget_reached",
+            "critical",
+            "今日 AI 预算已达到 " + budget.toFixed(2) + " 元，网站已暂停新的 AI 调用。请检查 DeepSeek 用量或提高预算。",
+            "daily-budget-" + personalDateKey()
+          );
+          return false;
+        }
+        const hourlyLimit = Math.max(1, Number(state.settings.aiHourlyCallLimit) || 20);
+        const hourlyEvents = recentAIEvents(60 * 60 * 1000);
+        if (hourlyEvents.length >= hourlyLimit) {
+          saveAIAlert(
+            "hourly_limit_reached",
+            "critical",
+            "最近一小时 AI 调用达到 " + hourlyEvents.length + " 次，超过安全阈值，网站已暂停新的调用。",
+            "hourly-limit-" + Math.floor(Date.now() / (60 * 60 * 1000))
+          );
+          return false;
+        }
+        return true;
+      }
+
+      function recordAIUsage(provider, model, data, context) {
+        const usage = data && data.usage ? data.usage : {};
+        const promptTokens = Number(usage.prompt_tokens || usage.input_tokens || 0);
+        const completionTokens = Number(usage.completion_tokens || usage.output_tokens || 0);
+        const cost = calculateAICost(promptTokens, completionTokens);
+        const now = Date.now();
+        const day = ensureAIUsageDay();
+        day.calls += 1;
+        day.promptTokens += promptTokens;
+        day.completionTokens += completionTokens;
+        day.cost = Number((day.cost + cost).toFixed(6));
+
+        state.aiUsage.events = recentAIEvents(24 * 60 * 60 * 1000);
+        state.aiUsage.events.push({
+          time: now,
+          provider: provider,
+          model: model,
+          context: context || "",
+          promptTokens: promptTokens,
+          completionTokens: completionTokens,
+          cost: cost
+        });
+
+        const budget = Math.max(0.01, Number(state.settings.aiDailyBudgetYuan) || 0);
+        const dailyRatio = day.cost / budget;
+        const singleLimit = Math.max(0, Number(state.settings.aiSingleCallAlertYuan) || 0);
+        const hourlyLimit = Math.max(1, Number(state.settings.aiHourlyCallLimit) || 20);
+        const hourlyEvents = recentAIEvents(60 * 60 * 1000);
+        const historical = Object.keys(state.aiUsage.daily).filter(function (key) {
+          return key !== personalDateKey();
+        }).sort().slice(-7).map(function (key) {
+          return Number(state.aiUsage.daily[key].cost || 0);
+        }).filter(function (value) {
+          return value > 0;
+        });
+        const historicalAverage = historical.length
+          ? historical.reduce(function (sum, value) { return sum + value; }, 0) / historical.length
+          : 0;
+
+        if (dailyRatio >= 1) {
+          saveAIAlert(
+            "daily_budget_reached",
+            "critical",
+            "今日 AI 估算消费约 " + day.cost.toFixed(3) + " 元，已达到 " + budget.toFixed(2) + " 元预算。新的 AI 调用已被暂停。",
+            "daily-budget-" + personalDateKey()
+          );
+        } else if (dailyRatio >= 0.9) {
+          saveAIAlert(
+            "daily_budget_90",
+            "critical",
+            "今日 AI 估算消费已达到预算的 " + Math.round(dailyRatio * 100) + "%。请检查 DeepSeek 账户用量。",
+            "daily-budget-90-" + personalDateKey()
+          );
+        } else if (dailyRatio >= 0.7) {
+          saveAIAlert(
+            "daily_budget_70",
+            "warning",
+            "今日 AI 估算消费已达到预算的 " + Math.round(dailyRatio * 100) + "%。网站会继续监测。",
+            "daily-budget-70-" + personalDateKey()
+          );
+        } else if (singleLimit > 0 && cost > singleLimit) {
+          saveAIAlert(
+            "single_call_high",
+            "warning",
+            "单次 AI 请求估算消费 " + cost.toFixed(3) + " 元，超过单次异常阈值。请确认请求内容是否正常。",
+            "single-call-" + Math.floor(now / (10 * 60 * 1000))
+          );
+        } else if (hourlyEvents.length >= hourlyLimit) {
+          saveAIAlert(
+            "hourly_limit_reached",
+            "critical",
+            "最近一小时 AI 调用达到 " + hourlyEvents.length + " 次，超过安全阈值，网站将暂停新的调用。",
+            "hourly-limit-" + Math.floor(now / (60 * 60 * 1000))
+          );
+        } else if (
+          historical.length >= 3 &&
+          historicalAverage > 0.001 &&
+          day.cost > historicalAverage * 2.5 &&
+          day.cost - historicalAverage > 0.01
+        ) {
+          saveAIAlert(
+            "usage_spike",
+            "warning",
+            "今日 AI 估算消费明显高于过去使用水平，可能出现了异常调用。当前约 " + day.cost.toFixed(3) + " 元。",
+            "usage-spike-" + personalDateKey()
+          );
+        }
+        persist();
       }
 
       function isPrivateUnlocked() {
@@ -7288,6 +7607,7 @@
       bindTopbarNavigation();
       bindGlobalEvents();
       render();
+      restoreAIAlertBanner();
       maybeStartAssessment();
     })();
   </script>
