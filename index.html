@@ -2669,7 +2669,7 @@
     <div class="assessment-card" id="assessmentCard"></div>
   </div>
 
-  <div class="private-overlay" id="privateOverlay" role="dialog" aria-modal="true" aria-label="我的英语重启计划">
+  <div class="private-overlay" id="privateOverlay" role="dialog" aria-modal="true" aria-label="管理员模式">
     <div class="private-shell" id="privateShell"></div>
   </div>
 
@@ -6790,8 +6790,8 @@
         return '<div class="private-gate">' +
           '<form class="private-gate-card" id="privateUnlockForm">' +
           '<div class="private-lock"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>' +
-          '<div class="private-kicker">Private Study Space</div>' +
-          '<h2 class="private-gate-title">我的英语重启计划</h2>' +
+          '<div class="private-kicker">Administrator Mode</div>' +
+          '<h2 class="private-gate-title">管理员模式</h2>' +
           '<p class="private-gate-copy">这里不看考试分数，只记录今天有没有和英语安全地待一会儿。</p>' +
           '<div class="private-password-row"><input id="privatePassword" type="password" autocomplete="current-password" placeholder="输入专属密码" /><button type="submit">进入</button></div>' +
           '<div class="private-error" id="privatePasswordError"></div>' +
@@ -6837,7 +6837,7 @@
             }).join("") : '<p class="private-panel-sub">当前词根数据不足。</p>') + '</div>';
 
         return '<div class="private-dashboard">' +
-          '<div class="private-topbar"><div class="private-brand"><div class="private-brand-mark">M</div><div class="private-brand-copy"><strong>我的英语重启计划</strong><span>隐藏空间 · 只对自己可见 · 数据保存在当前浏览器</span></div></div>' +
+          '<div class="private-topbar"><div class="private-brand"><div class="private-brand-mark">M</div><div class="private-brand-copy"><strong>管理员模式</strong><span>隐藏入口 · 180 天四级核心计划 · 数据保存在当前浏览器</span></div></div>' +
           '<button class="private-close" type="button" data-private-action="lock">锁定并返回</button></div>' +
           '<section class="private-hero">' +
           '<div class="private-hero-main"><div class="private-kicker">零基础保护模式 · 今天不默写</div>' +
