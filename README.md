@@ -39,7 +39,8 @@ npx serve .
 
 ```text
 index.html                主界面与核心逻辑
-vocab.js                  词库数据
+vocab.js                  公共词库数据
+admin-vocab.js            管理员模式专属 1500 词
 README.md                 项目说明
 LICENSE                   开源许可
 THIRD_PARTY_NOTICES.md    第三方数据声明

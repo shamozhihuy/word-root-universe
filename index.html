@@ -2857,6 +2857,7 @@
   <div class="toast" id="toast" role="status"></div>
 
   <script src="vocab.js"></script>
+  <script src="admin-vocab.js"></script>
   <script>
     (function () {
       "use strict";
@@ -2865,6 +2866,7 @@
       const STORAGE_KEY = "root-universe-v2";
       const PRIVATE_PASSWORD = "weidadeshamo";
       const PRIVATE_UNLOCK_KEY = "root-universe-private-unlocked";
+      const ADMIN_EXAM = "管理员模式";
       const PERSONAL_PLAN_DAYS = 180;
       const PERSONAL_PLAN_WORDS = 1800;
       const PERSONAL_STAGES = [
@@ -3030,6 +3032,10 @@
           rootAffix: item[12] || { root: "", meaning: "", affix: "" }
         };
       }
+
+      const ADMIN_WORDS = Array.isArray(window.ROOT_UNIVERSE_ADMIN_VOCAB)
+        ? window.ROOT_UNIVERSE_ADMIN_VOCAB.map(decodeVocabItem)
+        : [];
 
       const MODE_LABELS = {
         gallery: "词根画廊",
@@ -3200,9 +3206,20 @@
         return WORDS.concat(state.customWords);
       }
 
+      function allStudyWords() {
+        return allWords().concat(ADMIN_WORDS);
+      }
+
+      function findStudyWordById(id) {
+        return allStudyWords().find(function (word) { return word.id === id; }) || null;
+      }
+
       function wordsForExam(exam) {
         if (exam === "自定义") {
           return state.customWords.slice();
+        }
+        if (exam === ADMIN_EXAM) {
+          return ADMIN_WORDS.slice();
         }
         return allWords().filter(function (word) {
           return word.examTypes.indexOf(exam) !== -1;
@@ -3355,7 +3372,7 @@
           progress.queueOrder = order.slice();
         }
         return order.map(function (id) {
-          return allWords().find(function (word) { return word.id === id; });
+          return findStudyWordById(id);
         }).filter(Boolean);
       }
 
@@ -3522,6 +3539,9 @@
       function restoreLastSession() {
         const snapshot = state.lastSession;
         if (!snapshot) {
+          return;
+        }
+        if (snapshot.exam === ADMIN_EXAM) {
           return;
         }
         if (snapshot.exam) {
@@ -5105,7 +5125,7 @@
 
         document.querySelectorAll("[data-root-word]").forEach(function (button) {
           button.onclick = function () {
-            const word = allWords().find(function (item) { return item.id === button.dataset.rootWord; });
+            const word = findStudyWordById(button.dataset.rootWord);
             if (word) {
               state.mode = "gallery";
               state.currentExam = word.examTypes[0] || "自定义";
@@ -5772,7 +5792,8 @@
       function openRootDrawer(root) {
         const drawer = document.getElementById("drawer");
         const backdrop = document.getElementById("drawerBackdrop");
-        const matches = allWords().filter(function (word) { return word.roots.indexOf(root) !== -1; });
+        const sourceWords = state.currentExam === ADMIN_EXAM ? ADMIN_WORDS : allWords();
+        const matches = sourceWords.filter(function (word) { return word.roots.indexOf(root) !== -1; });
         const groups = {};
         matches.forEach(function (word) {
           word.examTypes.forEach(function (exam) {
@@ -5790,7 +5811,7 @@
           '<div class="drawer-sub">' + (primary ? escapeHtml(primary.meaning || "词根") + " · " : "词根 · ") + matches.length + " 个跨词库匹配</div></div>" +
           '<button class="close-btn" data-action="closeDrawer" aria-label="关闭"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>' +
           "</div>" +
-          EXAM_TYPES.filter(function (exam) { return groups[exam] && groups[exam].length; }).map(function (exam) {
+          EXAM_TYPES.concat(state.currentExam === ADMIN_EXAM ? [ADMIN_EXAM] : []).filter(function (exam) { return groups[exam] && groups[exam].length; }).map(function (exam) {
             return '<div class="root-group"><div class="root-group-title">' + escapeHtml(exam) + "</div>" +
               '<div class="root-word-list">' + groups[exam].map(function (word) {
                 return '<button class="root-word" data-root-word="' + escapeAttr(word.id) + '">' +
@@ -5801,7 +5822,7 @@
         drawer.querySelector("[data-action='closeDrawer']").onclick = closeDrawer;
         drawer.querySelectorAll("[data-root-word]").forEach(function (button) {
           button.onclick = function () {
-            const word = allWords().find(function (item) { return item.id === button.dataset.rootWord; });
+            const word = findStudyWordById(button.dataset.rootWord);
             if (word) {
               closeDrawer();
               state.mode = "gallery";
@@ -6845,7 +6866,7 @@
 
       function getPersonalStats() {
         const words = getPersonalCoreWords();
-        const progress = ensureProgress("CET-4");
+        const progress = ensureProgress(ADMIN_EXAM);
         const validIds = {};
         words.forEach(function (word) {
           validIds[word.id] = true;
@@ -6869,9 +6890,9 @@
           total: words.length,
           seen: seen,
           mastered: mastered,
-          due: getDueCount("CET-4"),
+          due: getDueCount(ADMIN_EXAM),
           mistakes: (progress.mistakes || []).length,
-          accuracy: getAccuracy("CET-4"),
+          accuracy: getAccuracy(ADMIN_EXAM),
           seconds: Math.max(day.seconds, day.seconds + liveSeconds),
           day: day,
           streak: getPersonalStreak(),
@@ -6920,18 +6941,12 @@
       }
 
       function getPersonalCoreWords() {
-        return getStudyQueue("CET-4").slice().sort(function (a, b) {
-          const scoreDifference = personalCoreScore(b) - personalCoreScore(a);
-          if (scoreDifference !== 0) {
-            return scoreDifference;
-          }
-          return a.word.localeCompare(b.word);
-        }).slice(0, PERSONAL_PLAN_WORDS);
+        return ADMIN_WORDS.slice(0, PERSONAL_PLAN_WORDS);
       }
 
       function getPersonalNewWords(limit) {
         const expected = Math.max(5, Math.min(50, Number(limit) || state.personal.dailyNewWords || 10));
-        const progress = ensureProgress("CET-4");
+        const progress = ensureProgress(ADMIN_EXAM);
         const seenIds = new Set(progress.seen || []);
         const mistakeIds = new Set(progress.mistakes || []);
         const masteredIds = new Set(progress.mastered || []);
@@ -6951,13 +6966,13 @@
       function getPersonalReviewWords(limit) {
         const expected = Math.max(5, Math.min(50, Number(limit) || 20));
         const coreIds = new Set(getPersonalCoreWords().map(function (word) { return word.id; }));
-        const due = getDueWords("CET-4").filter(function (word) { return coreIds.has(word.id); });
+        const due = getDueWords(ADMIN_EXAM).filter(function (word) { return coreIds.has(word.id); });
         if (due.length) {
           return due.slice(0, expected);
         }
-        const progress = ensureProgress("CET-4");
+        const progress = ensureProgress(ADMIN_EXAM);
         const mistakes = (progress.mistakes || []).filter(function (id) { return coreIds.has(id); }).map(function (id) {
-          return allWords().find(function (word) { return word.id === id; });
+          return findStudyWordById(id);
         }).filter(Boolean);
         if (mistakes.length) {
           return mistakes.slice(0, expected);
@@ -6971,7 +6986,7 @@
 
       function getPersonalSpellingWords(limit) {
         const expected = Math.max(5, Math.min(30, Number(limit) || 10));
-        const progress = ensureProgress("CET-4");
+        const progress = ensureProgress(ADMIN_EXAM);
         const seenIds = new Set(progress.seen || []);
         const masteredIds = new Set(progress.mastered || []);
         const mistakeIds = new Set(progress.mistakes || []);
@@ -6985,7 +7000,7 @@
 
       function getPersonalRoots() {
         const preferred = ["spect", "port", "dict", "form", "fact", "vis", "mit", "voc"];
-        const stats = buildRootStats("CET-4", false);
+        const stats = buildRootStats(ADMIN_EXAM, false);
         const byRoot = {};
         stats.forEach(function (item) {
           byRoot[item.root] = item;
@@ -7063,7 +7078,7 @@
           return;
         }
 
-        state.currentExam = "CET-4";
+        state.currentExam = ADMIN_EXAM;
         state.mode = mode;
         session = createSession();
         session.queue = words;
@@ -7076,7 +7091,7 @@
           recordPersonalAction(action === "starter" ? "new" : (action || "new"), words.length);
         }
         persist();
-        closePrivateSpace();
+        closePrivateSpace(true);
         render();
         pushNavigation();
         showToast(message);
@@ -7128,10 +7143,10 @@
         const newProgress = Math.min(100, Math.round((day.newWords / targetNew) * 100));
         const timeProgress = Math.min(100, Math.round((stats.seconds / 60 / targetMinutes) * 100));
         const roots = getPersonalRoots();
-        const progress = ensureProgress("CET-4");
+        const progress = ensureProgress(ADMIN_EXAM);
         const freshStart = stats.seen < 5;
         const mistakeWords = (progress.mistakes || []).map(function (id) {
-          return allWords().find(function (word) { return word.id === id; });
+          return findStudyWordById(id);
         }).filter(Boolean).slice(-5);
         const tasks = freshStart
           ? [
@@ -7295,18 +7310,18 @@
 
         shell.querySelectorAll("[data-private-word]").forEach(function (button) {
           button.addEventListener("click", function () {
-            const word = allWords().find(function (item) { return item.id === button.dataset.privateWord; });
+            const word = findStudyWordById(button.dataset.privateWord);
             if (!word) {
               return;
             }
-            state.currentExam = "CET-4";
+            state.currentExam = ADMIN_EXAM;
             state.mode = "review";
             session = createSession();
             session.queue = [word];
             session.trainingQueue = true;
             recordPersonalAction("review", 1);
             persist();
-            closePrivateSpace();
+            closePrivateSpace(true);
             render();
             pushNavigation();
           });
@@ -7342,7 +7357,7 @@
         document.documentElement.classList.add("private-open");
       }
 
-      function closePrivateSpace() {
+      function closePrivateSpace(preserveStudy) {
         const overlay = document.getElementById("privateOverlay");
         if (!overlay || !overlay.classList.contains("open")) {
           return;
@@ -7357,6 +7372,11 @@
         privateSessionStartedAt = 0;
         overlay.classList.remove("open");
         document.documentElement.classList.remove("private-open");
+        if (!preserveStudy && state.currentExam === ADMIN_EXAM) {
+          state.currentExam = "CET-4";
+          state.mode = "gallery";
+          session = createSession();
+        }
         persist();
       }
 
@@ -7367,6 +7387,13 @@
           // Ignore storage restrictions.
         }
         privateSessionStartedAt = 0;
+        if (state.currentExam === ADMIN_EXAM) {
+          state.currentExam = "CET-4";
+          state.mode = "gallery";
+          session = createSession();
+          persist();
+          render();
+        }
         renderPrivateSpace();
       }
 
