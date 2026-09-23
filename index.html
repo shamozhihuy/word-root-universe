@@ -2256,6 +2256,142 @@
       line-height: 1.7;
     }
 
+    .admin-study-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .admin-study-title {
+      margin: 5px 0 0;
+      color: #fff;
+      font-size: 24px;
+    }
+
+    .admin-study-sub {
+      margin-top: 5px;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+    }
+
+    .admin-study-card {
+      width: min(760px, 100%);
+      min-height: 390px;
+      margin: 0 auto;
+      padding: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 10px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.07);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+    }
+
+    .admin-study-word {
+      margin-top: 42px;
+      color: #fff;
+      font-size: 45px;
+      font-weight: 850;
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-study-phonetic {
+      margin-top: 10px;
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 16px;
+      text-align: center;
+    }
+
+    .admin-study-answer {
+      max-width: 590px;
+      margin: 30px auto 0;
+      color: rgba(255, 255, 255, 0.86);
+      font-size: 17px;
+      line-height: 1.75;
+      text-align: center;
+    }
+
+    .admin-study-answer small {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 255, 255, 0.58);
+      font-size: 13px;
+    }
+
+    .admin-study-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .admin-study-options {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      max-width: 680px;
+      margin: 26px auto 0;
+    }
+
+    .admin-study-option {
+      min-height: 54px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.07);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .admin-study-option.correct {
+      border-color: #8ccf9a;
+      background: rgba(50, 150, 80, 0.28);
+    }
+
+    .admin-study-option.wrong {
+      border-color: #e29a9a;
+      background: rgba(180, 55, 55, 0.24);
+    }
+
+    .admin-study-progress {
+      height: 6px;
+      overflow: hidden;
+      margin-bottom: 18px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.13);
+    }
+
+    .admin-study-progress span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: #f5a623;
+    }
+
+    .admin-study-input {
+      width: min(460px, 100%);
+      margin: 24px auto 0;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 8px;
+      color: #fff;
+      background: rgba(0, 0, 0, 0.2);
+      text-align: center;
+      font-size: 18px;
+      outline: none;
+    }
+
+    .admin-study-feedback {
+      min-height: 24px;
+      margin-top: 12px;
+      color: #f5d49c;
+      text-align: center;
+    }
+
     .review-dashboard,
     .speak-stage,
     .teacher-panel {
@@ -2678,6 +2814,20 @@
       .private-task button {
         grid-column: 1 / -1;
         width: 100%;
+      }
+
+      .admin-study-card {
+        min-height: 360px;
+        padding: 20px;
+      }
+
+      .admin-study-word {
+        margin-top: 28px;
+        font-size: 34px;
+      }
+
+      .admin-study-options {
+        grid-template-columns: 1fr;
       }
     }
 
@@ -3117,6 +3267,7 @@
       let privateLogoTapCount = 0;
       let privateLogoTapStartedAt = 0;
       let privateLogoTapTimer = null;
+      let privateStudySession = null;
       const PREVIEW_PAGE_SIZE = 120;
       let assessmentSession = {
         step: 0,
@@ -7039,6 +7190,7 @@
         let mode = "gallery";
         let words = [];
         let message = "";
+        const adminProgress = ensureProgress(ADMIN_EXAM);
         const beginner = state.personal.beginnerProtection !== false;
 
         if (action === "starter") {
@@ -7046,6 +7198,10 @@
           words = getPersonalNewWords(state.personal.dailyNewWords || 10);
           message = "先认识这 " + words.length + " 个词，只看、听、跟读一次，不默写";
         } else if (action === "review") {
+          if (!(adminProgress.seen || []).length && !(adminProgress.mistakes || []).length) {
+            showToast("第一天先认识词，暂时不需要复习");
+            return;
+          }
           mode = "review";
           words = getPersonalReviewWords(20);
           message = "先复习旧词，想不起来也没关系";
@@ -7078,23 +7234,248 @@
           return;
         }
 
-        state.currentExam = ADMIN_EXAM;
-        state.mode = mode;
-        session = createSession();
-        session.queue = words;
-        session.index = 0;
-        session.trainingQueue = true;
         state.personal.lastAction = action || "starter";
         if (action === "root") {
           recordPersonalAction("root", 1);
         } else {
           recordPersonalAction(action === "starter" ? "new" : (action || "new"), words.length);
         }
+        privateStudySession = {
+          active: true,
+          mode: mode,
+          words: words,
+          index: 0,
+          flipped: false,
+          answered: false,
+          feedback: "",
+          message: message,
+          options: [],
+          autoPlayed: false
+        };
+        if (words[0]) {
+          markSeen(ADMIN_EXAM, words[0].id);
+        }
         persist();
-        closePrivateSpace(true);
-        render();
-        pushNavigation();
-        showToast(message);
+        renderPrivateSpace();
+      }
+
+      function currentPrivateWord() {
+        if (!privateStudySession || !privateStudySession.words.length) {
+          return null;
+        }
+        return privateStudySession.words[privateStudySession.index] || null;
+      }
+
+      function advancePrivateStudy() {
+        if (!privateStudySession) {
+          return;
+        }
+        if (privateStudySession.index < privateStudySession.words.length - 1) {
+          privateStudySession.index += 1;
+          privateStudySession.flipped = false;
+          privateStudySession.answered = false;
+          privateStudySession.feedback = "";
+          privateStudySession.options = [];
+          privateStudySession.autoPlayed = false;
+          const word = currentPrivateWord();
+          if (word) {
+            markSeen(ADMIN_EXAM, word.id);
+          }
+        } else {
+          privateStudySession.index = privateStudySession.words.length;
+          privateStudySession.feedback = "这一组已经完成。忘记的词会自动进入后面的复习。";
+        }
+        persist();
+        renderPrivateSpace();
+      }
+
+      function gradePrivateWord(quality) {
+        const word = currentPrivateWord();
+        if (!word) {
+          return;
+        }
+        scheduleReview(ADMIN_EXAM, word.id, quality);
+        recordAttempt(ADMIN_EXAM, quality !== "again", word.id, true);
+        if (quality === "good") {
+          const progress = ensureProgress(ADMIN_EXAM);
+          if (progress.mastered.indexOf(word.id) === -1) {
+            progress.mastered.push(word.id);
+          }
+          progress.learnedAt[word.id] = progress.learnedAt[word.id] || Date.now();
+        }
+        if (quality === "again") {
+          addMistake(ADMIN_EXAM, word.id);
+        }
+        persist();
+        advancePrivateStudy();
+      }
+
+      function privateListenOptions(word) {
+        if (privateStudySession.options.length) {
+          return privateStudySession.options;
+        }
+        const others = shuffle(getPersonalCoreWords().filter(function (item) {
+          return item.id !== word.id && item.definitionCn !== word.definitionCn;
+        })).slice(0, 3);
+        privateStudySession.options = shuffle([word].concat(others));
+        return privateStudySession.options;
+      }
+
+      function choosePrivateListenOption(wordId) {
+        const word = currentPrivateWord();
+        if (!word || privateStudySession.answered) {
+          return;
+        }
+        privateStudySession.answered = true;
+        const correct = word.id === wordId;
+        recordAttempt(ADMIN_EXAM, correct, word.id, true);
+        scheduleReview(ADMIN_EXAM, word.id, correct ? "good" : "again");
+        if (!correct) {
+          addMistake(ADMIN_EXAM, word.id);
+        }
+        privateStudySession.feedback = correct ? "回答正确" : "正确答案：" + word.definitionCn;
+        persist();
+        renderPrivateSpace();
+      }
+
+      function checkPrivateSpelling() {
+        const word = currentPrivateWord();
+        const input = document.getElementById("adminSpellInput");
+        if (!word || !input || privateStudySession.answered) {
+          return;
+        }
+        const correct = input.value.trim().toLowerCase() === word.word.toLowerCase();
+        privateStudySession.answered = true;
+        recordAttempt(ADMIN_EXAM, correct, word.id, true);
+        scheduleReview(ADMIN_EXAM, word.id, correct ? "good" : "again");
+        if (!correct) {
+          addMistake(ADMIN_EXAM, word.id);
+        }
+        privateStudySession.feedback = correct ? "拼写正确" : "正确拼写：" + word.word;
+        persist();
+        renderPrivateSpace();
+      }
+
+      function renderPrivateStudyCard() {
+        if (!privateStudySession) {
+          return "";
+        }
+        if (privateStudySession.index >= privateStudySession.words.length) {
+          return '<div class="admin-study-card"><div class="private-kicker">本组完成</div>' +
+            '<h2 class="private-title">今天这一小组已经学完了</h2>' +
+            '<p class="private-lead">不要求全部记住。错词会自动进入下一次复习。</p>' +
+            '<div class="private-hero-actions"><button class="private-action primary" type="button" data-admin-action="exit">返回管理员模式</button>' +
+            '<button class="private-action" type="button" data-admin-action="restart">再来一轮</button></div></div>';
+        }
+
+        const word = currentPrivateWord();
+        if (!word) {
+          return "";
+        }
+        const total = Math.max(1, privateStudySession.words.length);
+        const progress = Math.round(((privateStudySession.index + 1) / total) * 100);
+        let body = "";
+
+        if (privateStudySession.mode === "listening") {
+          const options = privateListenOptions(word);
+          body = '<div class="private-kicker">听音辨义</div><h2 class="admin-study-title">听发音，选择最接近的中文意思</h2>' +
+            '<p class="admin-study-sub">播放按钮可以重复听，不要求一次就答对。</p>' +
+            '<div class="admin-study-actions"><button class="private-action primary" type="button" data-admin-action="speak">再听一次</button></div>' +
+            '<div class="admin-study-options">' + options.map(function (option, index) {
+              const stateClass = privateStudySession.answered
+                ? (option.id === word.id ? " correct" : " wrong")
+                : "";
+              return '<button class="admin-study-option' + stateClass + '" type="button" data-admin-option="' + index + '">' + escapeHtml(option.definitionCn) + '</button>';
+            }).join("") + '</div>' +
+            '<div class="admin-study-feedback">' + escapeHtml(privateStudySession.feedback || "") + '</div>' +
+            (privateStudySession.answered ? '<div class="admin-study-actions"><button class="private-action primary" type="button" data-admin-action="next">下一个</button></div>' : "");
+        } else if (privateStudySession.mode === "spelling") {
+          body = '<div class="private-kicker">拼写检查</div><h2 class="admin-study-title">根据中文写出英文</h2>' +
+            '<div class="admin-study-answer">' + escapeHtml(word.definitionCn) + '<small>长度：' + word.word.length + ' 个字母</small></div>' +
+            '<input class="admin-study-input" id="adminSpellInput" type="text" autocomplete="off" placeholder="输入英文单词" />' +
+            '<div class="admin-study-actions"><button class="private-action primary" type="button" data-admin-action="check-spelling">检查拼写</button></div>' +
+            '<div class="admin-study-feedback">' + escapeHtml(privateStudySession.feedback || "") + '</div>' +
+            (privateStudySession.answered ? '<div class="admin-study-actions"><button class="private-action primary" type="button" data-admin-action="next">下一个</button></div>' : "");
+        } else {
+          body = '<div class="private-kicker">' + escapeHtml(privateStudySession.mode === "review" ? "安全复习" : "认识单词") + '</div>' +
+            '<div class="admin-study-word">' + escapeHtml(word.word) + '</div>' +
+            '<div class="admin-study-phonetic">' + escapeHtml(word.phonetic || "") + '</div>' +
+            (privateStudySession.mode === "review" || privateStudySession.flipped
+              ? '<div class="admin-study-answer">' + escapeHtml(word.definitionCn) + '<small>' + escapeHtml(word.exampleSentence || "") + '</small></div>'
+              : "") +
+            '<div class="admin-study-actions">' +
+            '<button class="private-action" type="button" data-admin-action="speak">播放发音</button>' +
+            (privateStudySession.mode === "review" ? "" : '<button class="private-action" type="button" data-admin-action="flip">' + (privateStudySession.flipped ? "隐藏释义" : "显示释义") + '</button>') +
+            '</div>' +
+            '<div class="admin-study-actions">' +
+            '<button class="private-action" type="button" data-admin-grade="good">认识了</button>' +
+            '<button class="private-action" type="button" data-admin-grade="fuzzy">有点模糊</button>' +
+            '<button class="private-action" type="button" data-admin-grade="again">还不熟</button>' +
+            '</div>' +
+            '<div class="admin-study-feedback">' + escapeHtml(privateStudySession.feedback || "") + '</div>';
+        }
+
+        return '<div class="admin-study-head"><div><div class="private-kicker">管理员专属 1500 词</div>' +
+          '<h2 class="admin-study-title">' + escapeHtml(privateStudySession.message || "管理员学习") + '</h2>' +
+          '<div class="admin-study-sub">第 ' + (privateStudySession.index + 1) + " / " + total + ' 个词</div></div>' +
+          '<button class="private-action" type="button" data-admin-action="exit">返回管理员模式</button></div>' +
+          '<div class="admin-study-progress"><span style="width:' + progress + '%"></span></div>' +
+          '<div class="admin-study-card">' + body + '</div>';
+      }
+
+      function renderPrivateStudy() {
+        const card = renderPrivateStudyCard();
+        if (privateStudySession && privateStudySession.mode === "listening" && !privateStudySession.autoPlayed && currentPrivateWord()) {
+          privateStudySession.autoPlayed = true;
+          window.setTimeout(function () {
+            speakWord(currentPrivateWord());
+          }, 120);
+        }
+        return '<div class="private-dashboard">' + card + '</div>';
+      }
+
+      function bindPrivateStudyEvents(shell) {
+        shell.querySelectorAll("[data-admin-action]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            const action = button.dataset.adminAction;
+            if (action === "exit") {
+              privateStudySession = null;
+              renderPrivateSpace();
+            } else if (action === "restart" && privateStudySession) {
+              privateStudySession.index = 0;
+              privateStudySession.flipped = false;
+              privateStudySession.answered = false;
+              privateStudySession.feedback = "";
+              privateStudySession.options = [];
+              privateStudySession.autoPlayed = false;
+              renderPrivateSpace();
+            } else if (action === "speak") {
+              speakWord(currentPrivateWord());
+            } else if (action === "flip" && privateStudySession) {
+              privateStudySession.flipped = !privateStudySession.flipped;
+              renderPrivateSpace();
+            } else if (action === "check-spelling") {
+              checkPrivateSpelling();
+            } else if (action === "next") {
+              advancePrivateStudy();
+            }
+          });
+        });
+
+        shell.querySelectorAll("[data-admin-grade]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            gradePrivateWord(button.dataset.adminGrade);
+          });
+        });
+
+        shell.querySelectorAll("[data-admin-option]").forEach(function (button) {
+          button.addEventListener("click", function () {
+            const option = privateStudySession.options[Number(button.dataset.adminOption)];
+            if (option) {
+              choosePrivateListenOption(option.id);
+            }
+          });
+        });
       }
 
       function renderPrivateOnboarding() {
@@ -7144,7 +7525,23 @@
         const timeProgress = Math.min(100, Math.round((stats.seconds / 60 / targetMinutes) * 100));
         const roots = getPersonalRoots();
         const progress = ensureProgress(ADMIN_EXAM);
-        const freshStart = stats.seen < 5;
+        const todayKey = personalDateKey();
+        const previousStudyDays = Object.keys(state.personal.daily || {}).filter(function (key) {
+          const value = state.personal.daily[key];
+          return key < todayKey && value && (
+            value.seconds > 0 ||
+            value.newWords > 0 ||
+            value.reviews > 0 ||
+            value.listening > 0 ||
+            value.speaking > 0
+          );
+        });
+        const canReview = previousStudyDays.length > 0 && (
+          (progress.seen || []).length > 0 ||
+          (progress.mistakes || []).length > 0 ||
+          getDueCount(ADMIN_EXAM) > 0
+        );
+        const freshStart = !canReview;
         const mistakeWords = (progress.mistakes || []).map(function (id) {
           return findStudyWordById(id);
         }).filter(Boolean).slice(-5);
@@ -7177,7 +7574,7 @@
           '<div class="private-hero-main"><div class="private-kicker">零基础保护模式 · 今天不默写</div>' +
           '<h2 class="private-title">先认识词，再谈记住；先不痛苦，再谈考试。</h2>' +
           '<p class="private-lead">你可以把现在当成重新学英语的第 1 天。今天只需要 ' + targetMinutes + ' 分钟，认识 ' + targetNew + ' 个词，听发音、读一次。忘记不是失败，只是系统该安排下一次见面。</p>' +
-          '<div class="private-hero-actions"><button class="private-action primary" type="button" data-private-action="starter">开始最安全的一课</button><button class="private-action" type="button" data-private-action="' + (stats.seen ? "review" : "listening") + '">' + (stats.seen ? "只复习旧词" : "先听 3 个词") + '</button></div></div>' +
+          '<div class="private-hero-actions"><button class="private-action primary" type="button" data-private-action="starter">开始最安全的一课</button><button class="private-action" type="button" data-private-action="' + (canReview ? "review" : "listening") + '">' + (canReview ? "只复习旧词" : "先听 3 个词") + '</button></div></div>' +
           '<aside class="private-hero-side"><div class="private-kicker">180 天 · 1800 个四级核心词</div><div class="private-stage-name">' + escapeHtml(stage.period + " · " + stage.name) + '</div><div class="private-stage-goal">当前第 ' + stats.planDay + ' 天 · 剩余 ' + stats.planDaysRemaining + ' 天<br />已掌握 ' + stats.mastered + '/' + PERSONAL_PLAN_WORDS + ' · 自动建议每天至少 ' + stats.requiredPace + ' 词</div><div class="private-mini-progress"><span style="width:' + planProgress + '%"></span></div></aside>' +
           '</section>' +
           '<section class="private-stats">' +
@@ -7219,7 +7616,9 @@
         }
         shell.innerHTML = !isPrivateUnlocked()
           ? renderPrivateGate()
-          : (!state.personal.onboardingDone ? renderPrivateOnboarding() : renderPrivateDashboard());
+          : (!state.personal.onboardingDone
+            ? renderPrivateOnboarding()
+            : (privateStudySession && privateStudySession.active ? renderPrivateStudy() : renderPrivateDashboard()));
 
         const form = document.getElementById("privateUnlockForm");
         if (form) {
@@ -7314,16 +7713,22 @@
             if (!word) {
               return;
             }
-            state.currentExam = ADMIN_EXAM;
-            state.mode = "review";
-            session = createSession();
-            session.queue = [word];
-            session.trainingQueue = true;
+            privateStudySession = {
+              active: true,
+              mode: "review",
+              words: [word],
+              index: 0,
+              flipped: true,
+              answered: false,
+              feedback: "",
+              message: "复习这个词：" + word.word,
+              options: [],
+              autoPlayed: false
+            };
+            markSeen(ADMIN_EXAM, word.id);
             recordPersonalAction("review", 1);
             persist();
-            closePrivateSpace(true);
-            render();
-            pushNavigation();
+            renderPrivateSpace();
           });
         });
 
@@ -7343,6 +7748,10 @@
             persist();
             renderPrivateSpace();
           });
+        }
+
+        if (privateStudySession && privateStudySession.active) {
+          bindPrivateStudyEvents(shell);
         }
       }
 
@@ -7377,6 +7786,9 @@
           state.mode = "gallery";
           session = createSession();
         }
+        if (!preserveStudy) {
+          privateStudySession = null;
+        }
         persist();
       }
 
@@ -7387,6 +7799,7 @@
           // Ignore storage restrictions.
         }
         privateSessionStartedAt = 0;
+        privateStudySession = null;
         if (state.currentExam === ADMIN_EXAM) {
           state.currentExam = "CET-4";
           state.mode = "gallery";
